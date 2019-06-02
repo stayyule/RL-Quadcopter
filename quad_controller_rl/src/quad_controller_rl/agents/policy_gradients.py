@@ -8,8 +8,12 @@ from keras import backend as K
 class DDPG(BaseAgent):
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
-        # Task
+        # Task State Action
         self.task = task  # should contain observation_space and action_space
+        self.state_size = np.prod(self.task.observation_space.shape)
+        self.state_range = self.task.observation_space.high - self.task.observation_space.low
+        self.action_size = np.prod(self.task.action_space.shape)
+        self.action_range = self.task.action_space.high - self.task.action_space.low
 
         # Actor (Policy) Model
         self.action_low = self.task.action_space.low
