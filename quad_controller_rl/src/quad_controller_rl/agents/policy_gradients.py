@@ -217,6 +217,7 @@ class Critic:
             inputs=[*self.model.input, K.learning_phase()],
             outputs=action_gradients)
 
+
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
@@ -239,4 +240,30 @@ class OUNoise:
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
         self.state = x + dx
         return self.state
+
+class ReplayBuffer:
+    """Fixed-size circular buffer to store experience tuples."""
+
+    def __init__(self, size=1000):
+        """Initialize a ReplayBuffer object."""
+        self.size = size  # maximum size of buffer
+        self.memory = []  # internal memory (list)
+        self.idx = 0  # current index into circular buffer
+    
+    def add(self, state, action, reward, next_state, done):
+        """Add a new experience to memory."""
+        e = Experience(state, action, reward, next_state, done)
+        if len(self.memory) < self.size:
+            self.memory.append(e)
+        else:
+            self.memory[self.idx] = e
+            self.idx = (self.idx + 1) % self.size
+    
+    def sample(self, batch_size=64):
+        """Randomly sample a batch of experiences from memory."""
+        return random.sample(self.memory, k=batch_size)
+
+    def __len__(self):
+        """Return the current size of internal memory."""
+        return len(self.memory)
 
