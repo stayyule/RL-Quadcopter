@@ -61,6 +61,9 @@ class DDPG(BaseAgent):
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
             self.memory.add(self.last_state, self.last_action, reward, state, done)
+        
+        self.last_state = state
+        self.last_action = action
         #...
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
