@@ -25,6 +25,9 @@ class DDPG(BaseAgent):
         self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
         self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
 
+        self.last_state = None
+        self.last_action = None
+
         # Critic (Value) Model
         self.critic_local = Critic(self.state_size, self.action_size)
         self.critic_target = Critic(self.state_size, self.action_size)
@@ -61,7 +64,7 @@ class DDPG(BaseAgent):
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
             self.memory.add(self.last_state, self.last_action, reward, state, done)
-        
+
         self.last_state = state
         self.last_action = action
         #...
