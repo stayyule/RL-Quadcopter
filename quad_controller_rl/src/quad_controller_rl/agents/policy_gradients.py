@@ -1,18 +1,23 @@
 import numpy as np
 from quad_controller_rl.agents.base_agent import BaseAgent
+from quad_controller_rl.agents.takeoff import TakeOff
 
 from keras import layers, models, optimizers
 from keras import backend as K
 
+import os
+import pandas as pd
+from quad_controller_rl import util
 
 class DDPG(BaseAgent):
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
+
         self.state_size = np.prod(self.task.observation_space.shape)
-        self.state_range = self.task.observation_space.high - self.task.observation_space.low
         self.action_size = np.prod(self.task.action_space.shape)
+        self.state_range = self.task.observation_space.high - self.task.observation_space.low
         self.action_range = self.task.action_space.high - self.task.action_space.low
 
         # Actor (Policy) Model
@@ -40,7 +45,14 @@ class DDPG(BaseAgent):
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
         self.tau = 0.001 # for soft update of target parameters
-        #...
+
+        # Save episode stats
+        self.stats_filename = os.path.join(
+            util.get_param('out'),
+            "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
+        self.episode_num = 1
+        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
 
     def step(self, state, reward, done):
         #...
@@ -56,6 +68,10 @@ class DDPG(BaseAgent):
             experiences = self.memory.sample(self.batch_size)
             self.learn(experiences)
         #...
+        if done:
+            # Write episode stats
+            self.write_stats([self.episode_num, self.total_reward])
+            self.episode_num += 1
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""
@@ -96,6 +112,12 @@ class DDPG(BaseAgent):
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
         target_model.set_weights(new_weights)
+
+    def write_stats(self, stats):
+        """Write single episode stats to CSV file."""
+        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
+        df_stats.to_csv(self.stats_filename, mode='a', index=False,
+            header=not os.path.isfile(self.stats_filename))  # write header first time only
 
 
 class Actor:
@@ -240,6 +262,7 @@ class OUNoise:
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
         self.state = x + dx
         return self.state
+
 
 class ReplayBuffer:
     """Fixed-size circular buffer to store experience tuples."""
