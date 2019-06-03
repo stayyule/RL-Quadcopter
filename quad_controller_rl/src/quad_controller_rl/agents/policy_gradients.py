@@ -1,6 +1,5 @@
 import numpy as np
 from quad_controller_rl.agents.base_agent import BaseAgent
-from quad_controller_rl.agents.takeoff import TakeOff
 
 from keras import layers, models, optimizers
 from keras import backend as K
