@@ -8,6 +8,14 @@ import os
 import pandas as pd
 from quad_controller_rl import util
 
+import random
+
+from collections import namedtuple
+
+Experience = namedtuple("Experience",
+    field_names=["state", "action", "reward", "next_state", "done"])
+
+
 class DDPG(BaseAgent):
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
