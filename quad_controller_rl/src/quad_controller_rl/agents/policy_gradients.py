@@ -63,8 +63,6 @@ class DDPG(BaseAgent):
         self.episode_num = 1
         print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
 
-
-
     def reset_episode_vars(self):
         self.last_state = None
         self.last_action = None
@@ -101,6 +99,7 @@ class DDPG(BaseAgent):
         """Returns actions for given state(s) as per current policy."""
         states = np.reshape(states, [-1, self.state_size])
         actions = self.actor_local.model.predict(states)
+        print("actions:", actions)
         return actions + self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
