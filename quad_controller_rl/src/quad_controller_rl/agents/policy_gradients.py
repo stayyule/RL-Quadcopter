@@ -70,7 +70,8 @@ class DDPG(BaseAgent):
         self.count = 0
 
     def step(self, state, reward, done):
-        #...
+        # debug
+        print("step:", state, reward, done)
         # Choose an action
         action = self.act(state)
 
