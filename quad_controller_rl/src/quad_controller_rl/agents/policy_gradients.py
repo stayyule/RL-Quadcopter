@@ -77,7 +77,7 @@ class DDPG(BaseAgent):
         # Reduce state vector
         #state = self.preprocess_state(state)
         # debug
-        print("step:", state, reward, done)
+        #print("step:", state, reward, done)
         # Choose an action
         action = self.act(state)
 
@@ -105,7 +105,7 @@ class DDPG(BaseAgent):
 
         # Return complete action vector
         #return self.postprocess_action(action)
-        print("actions:", action)
+        #print("actions:", action)
         return action
 
     def act(self, states):
@@ -134,7 +134,7 @@ class DDPG(BaseAgent):
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
         self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
-        print(states, actions, Q_targets)
+        #print(states, actions, Q_targets)
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
