@@ -91,6 +91,7 @@ class DDPG(BaseAgent):
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
             experiences = self.memory.sample(self.batch_size)
+            #print('experience:', experiences)
             self.learn(experiences)
         #...
         if done:
@@ -104,16 +105,16 @@ class DDPG(BaseAgent):
 
         # Return complete action vector
         #return self.postprocess_action(action)
+        print("actions:", action)
         return action
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""
-        print('states before act:', states)
+        #print('states before act:', states)
         states = np.reshape(states, [-1, self.state_size])
-        print('states with shape:', states)
+        #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
-        print("actions:", actions)
-        print("noise:", self.noise.sample())
+        #print("noise:", self.noise.sample())
         return actions + self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
@@ -133,7 +134,7 @@ class DDPG(BaseAgent):
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
         self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
-
+        print(states, actions, Q_targets)
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
