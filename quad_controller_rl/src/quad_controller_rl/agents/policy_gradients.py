@@ -22,11 +22,11 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        #self.state_size = np.prod(self.task.observation_space.shape)
-        #self.action_size = np.prod(self.task.action_space.shape)
+        self.state_size = np.prod(self.task.observation_space.shape)
+        self.action_size = np.prod(self.task.action_space.shape)
         # Constrain state and action spaces
-        self.state_size = 3  # position only
-        self.action_size = 3  # force only
+        #self.state_size = 3  # position only
+        #self.action_size = 3  # force only
 
         self.state_range = self.task.observation_space.high - self.task.observation_space.low
         self.action_range = self.task.action_space.high - self.task.action_space.low
@@ -75,7 +75,7 @@ class DDPG(BaseAgent):
 
     def step(self, state, reward, done):
         # Reduce state vector
-        state = self.preprocess_state(state)
+        #state = self.preprocess_state(state)
         # debug
         print("step:", state, reward, done)
         # Choose an action
@@ -103,7 +103,8 @@ class DDPG(BaseAgent):
         self.last_action = action
 
         # Return complete action vector
-        return self.postprocess_action(action)
+        #return self.postprocess_action(action)
+        return action
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""
