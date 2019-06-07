@@ -55,9 +55,6 @@ class Hover(BaseTask):
             else:
                 reward -= 10
 
-        if pose.position.z - self.target_z > 1:
-            reward -= 10.0
-            done = True
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
             done = True
