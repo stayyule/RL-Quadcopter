@@ -53,7 +53,7 @@ class Takeoff(BaseTask):
         elif timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
             done = True
-        elif abs(pose.orientation.x + pose.orientation.y + pose.orientation.z + pose.orientation.w) > 1 :
+        elif abs(pose.orientation.x + pose.orientation.y) > 1 :
             reward -= 10.0
             done = True
 
