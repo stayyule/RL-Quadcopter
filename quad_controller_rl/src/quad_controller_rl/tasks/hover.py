@@ -49,20 +49,13 @@ class Hover(BaseTask):
         hover = False
         reward = -abs(pose.position.z - self.target_z)
         if abs(pose.position.z - self.target_z) < 1:
-            reward += 10.0
+            reward += 10 * abs(pose.position.z - self.target_z)
             hover = True
         else:
             hover = False
-        if abs(pose.position.z - self.target_z) > 15 :
+        if abs(pose.position.z - self.target_z) > 1 :
             reward -= 10.0
             done = True
-        if not hover:
-            if timestamp > self.max_duration:  # agent has run out of time
-                reward -= 10.0  # extra penalty
-                done = True
-        #elif abs(pose.orientation.x) > 1 or abs(pose.orientation.y) > 1 :
-        #    reward -= 10.0
-        #    done = True
 
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
