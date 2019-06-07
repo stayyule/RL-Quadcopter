@@ -49,11 +49,11 @@ class Hover(BaseTask):
         hover = False
         reward = -abs(pose.position.z - self.target_z)
         if abs(pose.position.z - self.target_z) < 1:
-            reward += 10 * abs(pose.position.z - self.target_z)
+            reward += 10 * ( 1 - abs(pose.position.z - self.target_z) )
             hover = True
         else:
             hover = False
-        if abs(pose.position.z - self.target_z) > 1 :
+        if pose.position.z - self.target_z > 1 :
             reward -= 10.0
             done = True
 
