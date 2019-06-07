@@ -52,11 +52,8 @@ class Hover(BaseTask):
         else:
             hover = False
 
-        reward = -abs(pose.position.z - self.target_z)
-
-        if abs(pose.position.z - self.target_z) < 1:
-            reward += 10 * ( 1 - abs(pose.position.z - self.target_z) )
-        
+        reward = np.power(2, -min(abs(pose.position.z - self.target_z), self.target_z) / self.target_z) * 10
+       
         if not hover:
             if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
                 reward -= 10.0  # extra penalty
