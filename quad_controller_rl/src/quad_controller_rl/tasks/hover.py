@@ -46,15 +46,10 @@ class Hover(BaseTask):
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-        reward = pose.position.z - self.target_z
-        if pose.position.z == self.target_z:
-            reward += 10
-        else:
-            if pose.position.z < self.target_z:
-                reward += min(1.0 / (self.target_z - pose.position.z) , 10)
-            else:
-                reward -= 10
-
+        reward = -abs(pose.position.z - self.target_z)
+        if abs(pose.position.z - self.target_z) > 15 :
+            reward -= 10.0
+            done = True
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
             done = True
