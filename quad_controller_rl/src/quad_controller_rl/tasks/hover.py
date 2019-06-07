@@ -25,7 +25,7 @@ class Hover(BaseTask):
         print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 10.0  # secs
+        self.max_duration = 5.0  # secs
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
     def reset(self):
