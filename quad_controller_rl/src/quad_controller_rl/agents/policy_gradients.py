@@ -99,7 +99,8 @@ class DDPG(BaseAgent):
 
         # Return complete action vector
         complete_action = action
-        complete_action[3:6] = np.zeros(3) # linear force only
+        print('action', action)
+        #complete_action[3:6] = np.zeros(3) # linear force only
         return complete_action
         #print("actions:", action)
         #return action
