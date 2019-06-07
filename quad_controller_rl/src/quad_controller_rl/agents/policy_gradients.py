@@ -49,12 +49,12 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 100000
-        self.batch_size = 64
+        self.buffer_size = 10000
+        self.batch_size = 32
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
-        self.gamma = 0.8 # discount factor
+        self.gamma = 0.9 # discount factor
         self.tau = 0.01 # for soft update of target parameters
 
         self.reset_episode_vars()
@@ -221,7 +221,7 @@ class Actor:
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam()
+        optimizer = optimizers.Adam(lr=0.001)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss, constraints=[])
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
@@ -276,7 +276,7 @@ class Critic:
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
 
         # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam()
+        optimizer = optimizers.Adam(lr=0.002)
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
