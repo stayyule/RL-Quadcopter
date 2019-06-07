@@ -47,7 +47,7 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         reward = pose.position.z - self.target_z
-        if pose.pozition.z == self.target_z:
+        if pose.position.z == self.target_z:
             reward += 10
         else:
             if pose.position.z < self.target_z:
