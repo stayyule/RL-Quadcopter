@@ -22,11 +22,8 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        #self.state_size = np.prod(self.task.observation_space.shape)
-        #self.action_size = np.prod(self.task.action_space.shape)
-        # Constrain state and action spaces
-        self.state_size = 3  # position only
-        self.action_size = 3  # force only
+        self.state_size = np.prod(self.task.observation_space.shape)
+        self.action_size = np.prod(self.task.action_space.shape)
 
         self.state_range = self.task.observation_space.high - self.task.observation_space.low
         self.action_range = self.task.action_space.high - self.task.action_space.low
@@ -74,10 +71,7 @@ class DDPG(BaseAgent):
         self.count = 0
 
     def step(self, state, reward, done):
-        # Reduce state vector
-        state = self.preprocess_state(state)
-        # debug
-        #print("step:", state, reward, done)
+
         # Choose an action
         action = self.act(state)
 
@@ -104,7 +98,9 @@ class DDPG(BaseAgent):
         self.last_action = action
 
         # Return complete action vector
-        return self.postprocess_action(action)
+        complete_action = np.zeros(self.task.action_space.shape) # shape: (6,)
+        complete_action[0:3] = action # linear force only
+        return complete_action
         #print("actions:", action)
         #return action
 
@@ -156,16 +152,6 @@ class DDPG(BaseAgent):
         df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
         df_stats.to_csv(self.stats_filename, mode='a', index=False,
             header=not os.path.isfile(self.stats_filename))  # write header first time only
-
-    def preprocess_state(self, state):
-        """Reduce state vector to relevant dimensions."""
-        return state[0:3] # position only
-
-    def postprocess_action(self, action):
-        """Return complete action vector."""
-        complete_action = np.zeros(self.task.action_space.shape) # shape: (6,)
-        complete_action[0:3] = action # linear force only
-        return complete_action
 
 
 class Actor:
