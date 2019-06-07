@@ -42,7 +42,7 @@ class Hover(BaseTask):
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
         state = np.array([
-                pose.position.x, pose.position.y, pose.position.z, abs(self.target_z - pose.position.z),
+                pose.position.x, pose.position.y, pose.position.z, self.target_z - pose.position.z,
                 pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
 
         # Compute reward / penalty and check if this episode is complete
