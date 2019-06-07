@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, orientation_x, .._y, .._z, .._w>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0, -1.0, -1.0, -1.0, -1.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, 1.0,  1.0,  1.0,  1.0]))
         print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -25,7 +25,8 @@ class Hover(BaseTask):
         print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 5.0  # secs
+        self.max_duration = 8.0  # secs
+        self.hover_sec = 3.0 # secs
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
     def reset(self):
@@ -41,22 +42,26 @@ class Hover(BaseTask):
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
         state = np.array([
-                pose.position.x, pose.position.y, pose.position.z,
+                pose.position.x, pose.position.y, pose.position.z, abs(self.target_z - pose.position.z),
                 pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-        hover = False
-        reward = -abs(pose.position.z - self.target_z)
-        if abs(pose.position.z - self.target_z) < 1:
-            reward += 10 * ( 1 - abs(pose.position.z - self.target_z) )
+        if pose.position.z > self.target_z:
             hover = True
         else:
             hover = False
-        if pose.position.z - self.target_z > 1 :
-            reward -= 10.0
-            done = True
+
+        reward = -abs(pose.position.z - self.target_z)
+
+        if abs(pose.position.z - self.target_z) < 1:
+            reward += 10 * ( 1 - abs(pose.position.z - self.target_z) )
+        
         if not hover:
+            if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
+                reward -= 10.0  # extra penalty
+                done = True
+        else:
             if timestamp > self.max_duration:  # agent has run out of time
                 reward -= 10.0  # extra penalty
                 done = True
