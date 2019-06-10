@@ -53,7 +53,7 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.1
-        reward_beta = 0.01
+        reward_beta = 1
 
         is_hover = False
 
