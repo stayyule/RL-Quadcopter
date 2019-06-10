@@ -64,7 +64,7 @@ class Hover(BaseTask):
             hover = False
             self.pos_x_alpha = 1
             self.pos_y_alpha = 1
-            self.pos_z_alpha = 1
+            self.pos_z_alpha = 2
             self.lin_x_alpha = 0.1
             self.lin_y_alpha = 0.1
             self.lin_z_alpha = 0.1
@@ -82,9 +82,9 @@ class Hover(BaseTask):
             reward_z = pose.position.z * self.pos_z_alpha
             reward = reward_x + reward_y + reward_z
 
-            print('x:', reward_x)
-            print('y:', reward_y)
-            print('z:', reward_z)
+            #print('x:', reward_x)
+            #print('y:', reward_y)
+            #print('z:', reward_z)
       
         if not hover:
             if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
