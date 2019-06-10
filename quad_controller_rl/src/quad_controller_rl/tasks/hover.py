@@ -25,8 +25,8 @@ class Hover(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 8.0  # secs
-        self.hover_sec = 3.0 # secs
+        self.max_duration = 5.0  # secs
+
         self.target_x = 0.0
         self.target_y = 0.0
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
@@ -51,23 +51,13 @@ class Hover(BaseTask):
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-        hover = False
-        if pose.position.z > self.target_z - 2:
-            hover = True
-            self.pos_x_alpha = 0.15
-            self.pos_y_alpha = 0.15
-            self.pos_z_alpha = 0.3
-            self.lin_x_alpha = 0.1
-            self.lin_y_alpha = 0.1
-            self.lin_z_alpha = 0.1
-        else:
-            hover = False
-            self.pos_x_alpha = 0.5
-            self.pos_y_alpha = 0.5
-            self.pos_z_alpha = 0.5
-            self.lin_x_alpha = 0.1
-            self.lin_y_alpha = 0.1
-            self.lin_z_alpha = 0.1
+
+        self.pos_x_alpha = 0.5
+        self.pos_y_alpha = 0.5
+        self.pos_z_alpha = 0.5
+        self.lin_x_alpha = 0.1
+        self.lin_y_alpha = 0.1
+        self.lin_z_alpha = 0.1
         
         self.reward_alpha = 0.8
 
@@ -75,28 +65,16 @@ class Hover(BaseTask):
         reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
         reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
 
-        if hover:
-            reward = (10 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
-                          + abs(self.target_x - pose.position.x) * self.pos_x_alpha
-                          + abs(self.target_y - pose.position.y) * self.pos_y_alpha
-                          + abs(linear_acceleration.x) * self.lin_x_alpha
-                          + abs(linear_acceleration.y) * self.lin_y_alpha
-                       )) * reward_alpha
-        else:
-            reward = (reward_x + reward_y + reward_z) * reward_alpha
-
-            #print('x:', reward_x)
-            #print('y:', reward_y)
-            #print('z:', reward_z)
-      
-        if not hover:
-            if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
-                reward -= 10.0  # extra penalty
-                done = True
-        else:
-            if timestamp > self.max_duration:  # agent has run out of time
-                reward -= 10.0  # extra penalty
-                done = True
+        reward = (10 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+                        + abs(self.target_x - pose.position.x) * self.pos_x_alpha
+                        + abs(self.target_y - pose.position.y) * self.pos_y_alpha
+                        + abs(linear_acceleration.x) * self.lin_x_alpha
+                        + abs(linear_acceleration.y) * self.lin_y_alpha
+                    )) * reward_alpha
+    
+        if timestamp > self.max_duration:  # agent has run out of time
+            reward -= 10.0  # extra penalty
+            done = True
 
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
