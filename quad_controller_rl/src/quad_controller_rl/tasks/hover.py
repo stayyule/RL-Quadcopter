@@ -77,11 +77,14 @@ class Hover(BaseTask):
                           + abs(linear_acceleration.y) * self.lin_y_alpha
                        )
         else:
-            reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+             reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
                           + abs(self.target_x - pose.position.x) * self.pos_x_alpha
                           + abs(self.target_y - pose.position.y) * self.pos_y_alpha
                           )
-       
+            print('x:', abs(self.target_x - pose.position.x) * self.pos_x_alpha)
+            print('y:', abs(self.target_y - pose.position.y) * self.pos_y_alpha)
+            print('z:', abs(self.target_z - pose.position.z) * self.pos_z_alpha)
+      
         if not hover:
             if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
                 reward -= 10.0  # extra penalty
