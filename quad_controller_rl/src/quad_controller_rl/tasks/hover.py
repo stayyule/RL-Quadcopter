@@ -53,13 +53,13 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.1
-        reward_beta = 0.5
+        reward_beta = 0.1
 
         is_hover = False
 
         distance = abs(self.target_z - pose.position.z)
 
-        if self.target_z - pose.position.z < 3.0:
+        if self.target_z - pose.position.z < 0.0:
             is_hover = True
 
         if is_hover:
