@@ -14,7 +14,7 @@ class Hover(BaseTask):
         self.observation_space = spaces.Box(
             np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0, -1.0, -1.0, -1.0, -1.0]),
             np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, 1.0,  1.0,  1.0,  1.0]))
-        print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
+        #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
         max_force = 25.0
@@ -22,12 +22,14 @@ class Hover(BaseTask):
         self.action_space = spaces.Box(
             np.array([-max_force, -max_force, -max_force, -max_torque, -max_torque, -max_torque]),
             np.array([ max_force,  max_force,  max_force,  max_torque,  max_torque,  max_torque]))
-        print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
+        #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
         self.max_duration = 8.0  # secs
         self.hover_sec = 3.0 # secs
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
+
+        self.alpha = 0.8
 
     def reset(self):
         # Nothing to reset; just return initial condition
@@ -44,15 +46,21 @@ class Hover(BaseTask):
         state = np.array([
                 pose.position.x, pose.position.y, pose.position.z, self.target_z - pose.position.z,
                 pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+        print('linear_acceleration', linear_acceleration)
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-        if pose.position.z > self.target_z:
+        if abs(pose.position.z - self.target_z) < 1:
             hover = True
         else:
             hover = False
 
-        reward = -abs(pose.position.z - self.target_z) + np.power(2, -min(abs(pose.position.z - self.target_z), self.target_z) / self.target_z) * 10
+        if hover:
+            reward = -min(abs(self.target_z - pose.position.z)
+                          + abs(pose.position.x)
+                          + abs(pose.position.y), 20.0) * self.alpha
+        else:
+            reward = -abs(pose.position.z - self.target_z)
        
         if not hover:
             if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
