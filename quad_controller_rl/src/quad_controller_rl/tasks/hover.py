@@ -52,13 +52,10 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 0.01
+        reward_alpha = 0.1
         reward_beta = 0.1
 
-        distance = np.power(
-                    np.power((self.target_z - pose.position.z) , 2) + 
-                    np.power((self.target_x - pose.position.x) , 2) +
-                    np.power((self.target_y - pose.position.y) , 2) , 0.5)
+        distance = abs(self.target_z - pose.position.z)
 
         reward = (10 - distance) * reward_alpha - (
             abs(linear_acceleration.x) + 
