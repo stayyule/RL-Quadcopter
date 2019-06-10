@@ -60,8 +60,6 @@ class Hover(BaseTask):
                     np.power((self.target_x - pose.position.x) , 2) +
                     np.power((self.target_y - pose.position.y) , 2) , 0.5)
 
-        print(distance, linear_acceleration)
-
         reward = (10 - distance) * reward_alpha - (
             abs(linear_acceleration.x) + 
             abs(linear_acceleration.y) +
