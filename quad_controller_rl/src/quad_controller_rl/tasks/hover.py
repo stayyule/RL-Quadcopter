@@ -34,7 +34,7 @@ class Hover(BaseTask):
         self.alpha = 0.8
         self.pos_x_alpha = 0.1
         self.pos_y_alpha = 0.1
-        self.pos_z_alpha = 0.2
+        self.pos_z_alpha = 0.3
         self.lin_x_alpha = 0.1
         self.lin_y_alpha = 0.1
         self.lin_z_alpha = 0.1
@@ -54,7 +54,7 @@ class Hover(BaseTask):
         state = np.array([
                 pose.position.x, pose.position.y, pose.position.z, self.target_z - pose.position.z,
                 pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
-        print('linear_acceleration', linear_acceleration)
+        #print('linear_acceleration', linear_acceleration)
 
         # Compute reward / penalty and check if this episode is complete
         done = False
