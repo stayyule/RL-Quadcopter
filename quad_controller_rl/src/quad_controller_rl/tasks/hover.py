@@ -57,15 +57,15 @@ class Hover(BaseTask):
         self.pos_z_alpha = 0.5
         self.lin_x_alpha = 1
         self.lin_y_alpha = 1
-        self.lin_z_alpha = 0.5
+        self.lin_z_alpha = 0.8
         
-        self.reward_alpha = 0.8
+        self.reward_alpha = 0.9
 
         reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
         reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
         reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
 
-        reward = (10 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+        reward = (5 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
                         + abs(self.target_x - pose.position.x) * self.pos_x_alpha
                         + abs(self.target_y - pose.position.y) * self.pos_y_alpha
                         + abs(linear_acceleration.x) * self.lin_x_alpha
