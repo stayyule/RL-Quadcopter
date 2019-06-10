@@ -34,7 +34,7 @@ class Hover(BaseTask):
     def reset(self):
         # Nothing to reset; just return initial condition
         return Pose(
-                position=Point(0.0, 0.0, 10 + np.random.normal(0.5, 0.1)),  # drop off from a slight random height
+                position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
                 orientation=Quaternion(0.0, 0.0, 0.0, 0.0),
             ), Twist(
                 linear=Vector3(0.0, 0.0, 0.0),
@@ -52,7 +52,7 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         hover = False
-        if pose.position.z - self.target_z < 2 and pose.position.z > self.target_z:
+        if pose.position.z > self.target_z - 2:
             hover = True
             self.pos_x_alpha = 0.15
             self.pos_y_alpha = 0.15
@@ -68,6 +68,8 @@ class Hover(BaseTask):
             self.lin_x_alpha = 0.1
             self.lin_y_alpha = 0.1
             self.lin_z_alpha = 0.1
+        
+        self.reward_alpha = 0.8
 
         if hover:
             reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
@@ -80,7 +82,7 @@ class Hover(BaseTask):
             reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
             reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
             reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
-            reward = reward_x + reward_y + reward_z
+            reward = (10 - reward_x + reward_y + reward_z) * reward_alpha
 
             #print('x:', reward_x)
             #print('y:', reward_y)
