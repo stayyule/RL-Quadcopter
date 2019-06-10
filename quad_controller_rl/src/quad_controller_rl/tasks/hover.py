@@ -62,9 +62,9 @@ class Hover(BaseTask):
             self.lin_z_alpha = 0.1
         else:
             hover = False
-            self.pos_x_alpha = 0.1
-            self.pos_y_alpha = 0.1
-            self.pos_z_alpha = 0.2
+            self.pos_x_alpha = 1
+            self.pos_y_alpha = 1
+            self.pos_z_alpha = 0.5
             self.lin_x_alpha = 0.1
             self.lin_y_alpha = 0.1
             self.lin_z_alpha = 0.1
