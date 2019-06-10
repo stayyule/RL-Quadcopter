@@ -59,13 +59,13 @@ class Hover(BaseTask):
 
         distance = abs(self.target_z - pose.position.z)
 
-        if self.target_z - pose.position.z < 3:
+        if self.target_z - pose.position.z < 3.0:
             is_hover = True
 
         if is_hover:
-            reward = (10 - distance) * reward_alpha - (self.target_z - pose.position.z) * linear_acceleration.z * reward_beta
+            reward = (10.0 - distance) * reward_alpha - (self.target_z - pose.position.z) * linear_acceleration.z * reward_beta
         else:
-            reward = (10 - distance) * reward_alpha
+            reward = (10.0 - distance) * reward_alpha
     
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
