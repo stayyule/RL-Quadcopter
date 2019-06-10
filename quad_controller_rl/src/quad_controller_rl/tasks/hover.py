@@ -79,7 +79,7 @@ class Hover(BaseTask):
         else:
             reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
             reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
-            reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
+            reward_z = ( pose.position.z - self.target_z / 2 ) * self.pos_z_alpha
             reward = reward_x + reward_y + reward_z
 
             print('x:', reward_x)
