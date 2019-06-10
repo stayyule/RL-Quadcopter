@@ -9,11 +9,11 @@ class Hover(BaseTask):
     """Simple task where the goal is to lift off the ground and reach a target height."""
 
     def __init__(self):
-        # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z>
+        # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0,       0.0,       0.0 ]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, cube_size, cube_size ]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0,       0.0,       0.0,  -15.0, -15.0, -15.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, cube_size, cube_size,   15.0,  15.0,  15.0]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -32,12 +32,7 @@ class Hover(BaseTask):
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
         self.alpha = 0.8
-        self.pos_x_alpha = 0.15
-        self.pos_y_alpha = 0.15
-        self.pos_z_alpha = 0.3
-        self.lin_x_alpha = 0.1
-        self.lin_y_alpha = 0.1
-        self.lin_z_alpha = 0.1
+
 
     def reset(self):
         # Nothing to reset; just return initial condition
@@ -53,22 +48,44 @@ class Hover(BaseTask):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
         state = np.array([
                 pose.position.x, pose.position.y, pose.position.z,
-                - pose.position.x, - pose.position.y, self.target_z - pose.position.z])
+                self.target_x - pose.position.x, self.target_y - pose.position.y, self.target_z - pose.position.z,
+                linear_acceleration.x, linear_acceleration.y, linear_acceleration.z ])
         #print('linear_acceleration', linear_acceleration)
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-        if abs(pose.position.z - self.target_z) < 1:
+        if abs(pose.position.z - self.target_z) < 3:
             hover = True
+            self.pos_x_alpha = 0.015
+            self.pos_y_alpha = 0.015
+            self.pos_z_alpha = 0.3
+            self.lin_x_alpha = 0.1
+            self.lin_y_alpha = 0.1
+            self.lin_z_alpha = 0.1
         else:
             hover = False
+            self.pos_x_alpha = 0.015
+            self.pos_y_alpha = 0.015
+            self.pos_z_alpha = 0.3
+            self.lin_x_alpha = 0.01
+            self.lin_y_alpha = 0.01
+            self.lin_z_alpha = 0.05
 
         if hover:
             reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
-                          + abs(pose.position.x) * self.pos_x_alpha
-                          + abs(pose.position.y) * self.pos_y_alpha) * self.alpha
+                          + abs(self.target_x - pose.position.x) * self.pos_x_alpha
+                          + abs(self.target_y - pose.position.y) * self.pos_y_alpha
+                          + abs(linear_acceleration.x) * self.lin_x_alpha
+                          + abs(linear_acceleration.y) * self.lin_y_alpha
+                       ) * self.alpha
         else:
-            reward = -abs(pose.position.z - self.target_z)
+            reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+                          + abs(self.target_x - pose.position.x) * self.pos_x_alpha
+                          + abs(self.target_y - pose.position.y) * self.pos_y_alpha
+                          + abs(linear_acceleration.x) * self.lin_x_alpha
+                          + abs(linear_acceleration.y) * self.lin_y_alpha
+                          + abs(linear_acceleration.z) * self.lin_z_alpha
+                        ) * self.alpha
        
         if not hover:
             if timestamp > self.max_duration - self.hover_sec:  # agent has run out of time
