@@ -51,26 +51,16 @@ class Hover(BaseTask):
 
         # Compute reward / penalty and check if this episode is complete
         done = False
-
-        self.pos_x_alpha = 1
-        self.pos_y_alpha = 1
-        self.pos_z_alpha = 0.5
-        self.lin_x_alpha = 1
-        self.lin_y_alpha = 1
-        self.lin_z_alpha = 0.8
         
         self.reward_alpha = 0.9
+        self.reward_beta = 0.8
 
-        reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
-        reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
-        reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
-
-        reward = (5 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
-                        + abs(self.target_x - pose.position.x) * self.pos_x_alpha
-                        + abs(self.target_y - pose.position.y) * self.pos_y_alpha
-                        + abs(linear_acceleration.x) * self.lin_x_alpha
-                        + abs(linear_acceleration.y) * self.lin_y_alpha
-                    )) * self.reward_alpha
+        reward = (10 - np.power(
+                    np.power((self.target_z - pose.position.z) , 2) + 
+                    np.power((self.target_x - pose.position.x) , 2) +
+                    np.power((self.target_y - pose.position.y) , 2) , 0.5)
+                    ) * self.reward_alpha
+                    - (abs(linear_acceleration.x) + abs(linear_acceleration.y)) * self.reward_beta
     
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
