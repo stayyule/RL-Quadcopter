@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0,       0.0,       0.0,  -15.0, -15.0, -15.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, cube_size, cube_size,   15.0,  15.0,  15.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0,       0.0,       0.0,       0.0,  -150.0, -150.0, -150.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size, cube_size, cube_size, cube_size,   150.0,  150.0,  150.0]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -48,7 +48,7 @@ class Hover(BaseTask):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
         state = np.array([
                 pose.position.x, pose.position.y, pose.position.z,
-                self.target_x - pose.position.x, self.target_y - pose.position.y, self.target_z - pose.position.z,
+                abs(self.target_x - pose.position.x), abs(self.target_y - pose.position.y), abs(self.target_z - pose.position.z),
                 linear_acceleration.x, linear_acceleration.y, linear_acceleration.z ])
         #print('linear_acceleration', linear_acceleration)
 
