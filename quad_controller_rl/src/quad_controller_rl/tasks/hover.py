@@ -71,18 +71,19 @@ class Hover(BaseTask):
         
         self.reward_alpha = 0.8
 
+        reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
+        reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
+        reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
+
         if hover:
-            reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+            reward = (10 -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
                           + abs(self.target_x - pose.position.x) * self.pos_x_alpha
                           + abs(self.target_y - pose.position.y) * self.pos_y_alpha
                           + abs(linear_acceleration.x) * self.lin_x_alpha
                           + abs(linear_acceleration.y) * self.lin_y_alpha
-                       )
+                       )) * reward_alpha
         else:
-            reward_x = -abs(self.target_x - pose.position.x) * self.pos_x_alpha
-            reward_y = -abs(self.target_y - pose.position.y) * self.pos_y_alpha
-            reward_z = -abs(self.target_z - pose.position.z) * self.pos_z_alpha
-            reward = (10 - reward_x + reward_y + reward_z) * reward_alpha
+            reward = (reward_x + reward_y + reward_z) * reward_alpha
 
             #print('x:', reward_x)
             #print('y:', reward_y)
