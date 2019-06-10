@@ -63,10 +63,7 @@ class Hover(BaseTask):
             is_hover = True
 
         if is_hover:
-            reward = (10 - distance) * reward_alpha - (
-                abs(linear_acceleration.x) + 
-                abs(linear_acceleration.y) +
-                abs(linear_acceleration.z)) * reward_beta
+            reward = (10 - distance) * reward_alpha - abs(linear_acceleration.z) * reward_beta
         else:
             reward = (10 - distance) * reward_alpha
     
