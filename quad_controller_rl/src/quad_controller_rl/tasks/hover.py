@@ -52,12 +52,12 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
 
-        self.pos_x_alpha = 0.5
-        self.pos_y_alpha = 0.5
+        self.pos_x_alpha = 1
+        self.pos_y_alpha = 1
         self.pos_z_alpha = 0.5
         self.lin_x_alpha = 1
         self.lin_y_alpha = 1
-        self.lin_z_alpha = 1
+        self.lin_z_alpha = 0.5
         
         self.reward_alpha = 0.8
 
