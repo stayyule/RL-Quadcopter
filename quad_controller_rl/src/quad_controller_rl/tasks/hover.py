@@ -27,9 +27,17 @@ class Hover(BaseTask):
         # Task-specific parameters
         self.max_duration = 8.0  # secs
         self.hover_sec = 3.0 # secs
+        self.target_x = 0.0
+        self.target_y = 0.0
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
         self.alpha = 0.8
+        self.pos_x_alpha = 0.1
+        self.pos_y_alpha = 0.1
+        self.pos_z_alpha = 0.2
+        self.lin_x_alpha = 0.1
+        self.lin_y_alpha = 0.1
+        self.lin_z_alpha = 0.1
 
     def reset(self):
         # Nothing to reset; just return initial condition
@@ -56,9 +64,9 @@ class Hover(BaseTask):
             hover = False
 
         if hover:
-            reward = -min(abs(self.target_z - pose.position.z)
-                          + abs(pose.position.x)
-                          + abs(pose.position.y), 20.0) * self.alpha
+            reward = -(abs(self.target_z - pose.position.z) * self.pos_z_alpha
+                          + abs(pose.position.x) * self.pos_x_alpha
+                          + abs(pose.position.y) * self.pos_y_alpha) * self.alpha
         else:
             reward = -abs(pose.position.z - self.target_z)
        
