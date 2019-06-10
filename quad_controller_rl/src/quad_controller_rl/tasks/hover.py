@@ -31,9 +31,6 @@ class Hover(BaseTask):
         self.target_y = 0.0
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
-        self.alpha = 0.8
-
-
     def reset(self):
         # Nothing to reset; just return initial condition
         return Pose(
@@ -67,7 +64,7 @@ class Hover(BaseTask):
             hover = False
             self.pos_x_alpha = 0.1
             self.pos_y_alpha = 0.1
-            self.pos_z_alpha = 0.1
+            self.pos_z_alpha = 0.5
             self.lin_x_alpha = 0.1
             self.lin_y_alpha = 0.1
             self.lin_z_alpha = 0.1
