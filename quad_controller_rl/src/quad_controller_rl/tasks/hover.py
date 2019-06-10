@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0, - cube_size, - cube_size,       0.0,  -150.0, -150.0, -150.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size,   cube_size, cube_size,   150.0,  150.0,  150.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0, - cube_size, - cube_size,       0.0,  -15.0, -15.0, -15.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size,   cube_size, cube_size,   15.0,  15.0,  15.0]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -52,7 +52,7 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 0.1
+        reward_alpha = 0.01
         reward_beta = 0.1
 
         distance = np.power(
@@ -61,7 +61,7 @@ class Hover(BaseTask):
                     np.power((self.target_y - pose.position.y) , 2) , 0.5)
 
         print(distance, linear_acceleration)
-        
+
         reward = (10 - distance) * reward_alpha - (
             abs(linear_acceleration.x) + 
             abs(linear_acceleration.y) +
