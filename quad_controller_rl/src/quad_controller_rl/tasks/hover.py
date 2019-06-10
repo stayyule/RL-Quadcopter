@@ -80,8 +80,9 @@ class Hover(BaseTask):
                           + abs(linear_acceleration.y) * self.lin_y_alpha
                        ) * self.alpha
         else:
-            reward = (pose.position.z -(abs(linear_acceleration.x) * self.lin_x_alpha
-                          + abs(linear_acceleration.y) * self.lin_y_alpha)
+            reward = (pose.position.z -
+                        (abs(self.target_x - pose.position.x) * self.pos_x_alpha
+                          + abs(self.target_y - pose.position.y) * self.pos_y_alpha)
                         ) * self.alpha
        
         if not hover:
