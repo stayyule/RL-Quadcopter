@@ -63,13 +63,12 @@ class Hover(BaseTask):
         target_x *= 5.0
         target_x *= 5.0
         target_z *= 5.0
-        del_x = target_x - scaled_x
-        del_y = target_y - scaled_y
-        del_z = target_z - scaled_z
 
+        del_z = target_z - scaled_z
+        vel_z = scaled_z - self.last_z
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
-                (scaled_z - self.last_z)*10, del_z])
+                vel_z*10, del_z])
         print('state', state)
 
         self.last_x = scaled_x
@@ -83,7 +82,7 @@ class Hover(BaseTask):
         reward_beta = 10.0
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
-        accelerate_reward = np.power((scaled_z - self.last_z), 2) * reward_beta
+        accelerate_reward = abs(vel_z) * reward_beta
         if pose.position.z < 5:
             reward = distance_reward
         else:
