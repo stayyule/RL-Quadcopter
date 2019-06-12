@@ -101,6 +101,7 @@ class DDPG(BaseAgent):
         complete_action = action
         #print('action', action)
         complete_action[0][-3:] = np.zeros(3) # linear force only
+        complete_action[0][:1] = np.zeros(2) # z only
         return complete_action
         #print("actions:", action)
         #return action
