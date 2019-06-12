@@ -71,7 +71,7 @@ class Hover(BaseTask):
                 scaled_x, scaled_y, scaled_z,
                 (scaled_x - self.last_x)*10, (scaled_y - self.last_y)*10, (scaled_z - self.last_z)*10,
                 del_x, del_y, del_z])
-        #print('state', state)
+        print('state', state)
 
         self.last_x = scaled_x
         self.last_y = scaled_y
