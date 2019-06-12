@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0, - cube_size, - cube_size,       0.0,  -50.0, -50.0, -50.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size,   cube_size, cube_size,   50.0,  50.0,  50.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0, - cube_size, - cube_size, - cube_size,           0.0,            0.0,            0.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size,   cube_size,   cube_size, cube_size / 2,  cube_size / 2,  cube_size / 2]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -25,11 +25,15 @@ class Hover(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 10.0  # secs
+        self.max_duration = 5.0  # secs
 
         self.target_x = 0.0
         self.target_y = 0.0
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
+
+        self.last_x = 0.0
+        self.last_y = 0.0
+        self.last_z = 0.0
 
     def reset(self):
         # Nothing to reset; just return initial condition
@@ -43,11 +47,19 @@ class Hover(BaseTask):
 
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
+        del_x = self.target_x - pose.position.x
+        del_y = self.target_y - pose.position.y
+        del_z = self.target_z - pose.position.z
+
         state = np.array([
                 pose.position.x, pose.position.y, pose.position.z,
-                self.target_x - pose.position.x, self.target_y - pose.position.y, self.target_z - pose.position.z,
-                linear_acceleration.x, linear_acceleration.y, linear_acceleration.z ])
+                pose.position.x - self.last_x, pose.position.y - self.last_y, pose.position.z - self.last_z,
+                del_x, del_y, del_z])
         #print('linear_acceleration', linear_acceleration)
+
+        self.last_x = pose.position.x
+        self.last_y = pose.position.y
+        self.last_z = pose.position.z
 
         # Compute reward / penalty and check if this episode is complete
         done = False
@@ -55,18 +67,10 @@ class Hover(BaseTask):
         reward_alpha = 0.1
         reward_beta = 0.1
 
-        is_hover = False
+        distance = np.power(np.power(del_x,2) + np.power(del_y,2) + np.power(del_z,2), 0.5)
 
-        distance = abs(self.target_z - pose.position.z)
+        reward = (10.0 - distance) * reward_alpha - (linear_acceleration.x + linear_acceleration.y + linear_acceleration.z) * reward_beta
 
-        if self.target_z - pose.position.z < 0.0:
-            is_hover = True
-
-        if is_hover:
-            reward = (10.0 - distance) * reward_alpha + max(min((self.target_z - pose.position.z) * linear_acceleration.z * reward_beta, -10), 10)
-        else:
-            reward = (10.0 - distance) * reward_alpha
-    
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
             done = True
