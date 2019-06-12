@@ -53,13 +53,13 @@ class Hover(BaseTask):
 
         scaled_x = pose.position.x / self.scale
         scaled_y = pose.position.y / self.scale
-        scaled_z = pose.position.z / 10 - 1
+        scaled_z = pose.position.z / self.scale - 1
         scaled_x *= 5
         scaled_y *= 5
         scaled_z *= 5
         target_x = self.target_x / self.scale
         target_y = self.target_y / self.scale
-        target_z = self.target_z / 10 - 1
+        target_z = self.target_z / self.scale - 1
         target_x *= 5
         target_x *= 5
         target_z *= 5
