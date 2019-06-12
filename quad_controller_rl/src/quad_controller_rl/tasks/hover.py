@@ -81,13 +81,13 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.1
-        reward_beta = 0.01
+        reward_beta = 0.05
 
         distance = np.power(np.power(del_x,2) + np.power(del_y,2) + np.power(del_z,2), 0.5)
         accel = np.power(np.power(linear_acceleration.x,2) + np.power(linear_acceleration.y,2) + np.power(linear_acceleration.z,2), 0.5)
 
-        #print('distance:', distance)
-        #print('accelerate:', accel)
+        print('distance:', distance)
+        print('accelerate:', accel)
 
         reward = (5.0 - distance) * reward_alpha - accel * reward_beta
 
