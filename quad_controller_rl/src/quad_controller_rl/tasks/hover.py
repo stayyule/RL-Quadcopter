@@ -79,13 +79,16 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 0.5
+        reward_alpha = 0.8
         reward_beta = 0.2
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
-        accelerate_reward = (1.0 - abs(linear_acceleration.z)) * reward_beta
+        accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
-        reward = distance_reward + accelerate_reward
+        if pose.position.z < 1:
+            reward = distance_reward
+        else:
+            reward = distance_reward - accelerate_reward
         #reward = distance_reward
         print('=====', pose.position.z ,'=====')
         print('reward:', reward)
