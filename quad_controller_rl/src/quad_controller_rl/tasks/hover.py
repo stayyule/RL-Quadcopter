@@ -69,9 +69,8 @@ class Hover(BaseTask):
 
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
-                (scaled_x - self.last_x)*10, (scaled_y - self.last_y)*10, (scaled_z - self.last_z)*10,
-                del_x, del_y, del_z, linear_acceleration.x, linear_acceleration.y, linear_acceleration.z])
-        print('state', state)
+                (scaled_z - self.last_z)*10, del_z])
+        #print('state', state)
 
         self.last_x = scaled_x
         self.last_y = scaled_y
@@ -80,14 +79,11 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 1
-        reward_beta = 0.5
+        reward_alpha = 0.5
+        reward_beta = 0.2
 
-        distance = np.power(np.power(del_x,2) + np.power(del_y,2) + np.power(del_z,2), 0.5)
-        accel = np.power(np.power(linear_acceleration.x,2) + np.power(linear_acceleration.y,2) + np.power(linear_acceleration.z,2), 0.5)
-
-        distance_reward = (5.0 - distance) * reward_alpha
-        accelerate_reward = accel * reward_beta
+        distance_reward = (5.0 - abs(del_z)) * reward_alpha
+        accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
         reward = distance_reward - accelerate_reward
 
