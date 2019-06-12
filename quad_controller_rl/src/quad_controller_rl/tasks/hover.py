@@ -34,6 +34,7 @@ class Hover(BaseTask):
         self.last_x = 0.0
         self.last_y = 0.0
         self.last_z = 0.0
+        self.last_linear_acce_z = 0.0
 
         self.scale = cube_size / 2
 
