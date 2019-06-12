@@ -90,6 +90,7 @@ class Hover(BaseTask):
         print('accelerate:', accel)
 
         reward = (5.0 - distance) * reward_alpha - accel * reward_beta
+        print('reward:', reward)
 
         if pose.position.z > 20.0:
             reward -= 10.0  # extra penalty
