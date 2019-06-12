@@ -35,6 +35,9 @@ class Hover(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
 
+        self.scale = cube_size / 2
+
+
     def reset(self):
         # Nothing to reset; just return initial condition
         return Pose(
@@ -47,19 +50,32 @@ class Hover(BaseTask):
 
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
-        del_x = self.target_x - pose.position.x
-        del_y = self.target_y - pose.position.y
-        del_z = self.target_z - pose.position.z
+
+        scaled_x = pose.position.x / self.scale
+        scaled_y = pose.position.y / self.scale
+        scaled_z = pose.position.z / self.scale - 1
+        scaled_x *= 5
+        scaled_y *= 5
+        scaled_z *= 5
+        target_x = self.target_x / self.scale
+        target_y = self.target_y / self.scale
+        target_z = self.target_z / self.scale - 1
+        target_x *= 5
+        target_x *= 5
+        target_z *= 5
+        del_x = target_x - scaled_x
+        del_y = target_y - scaled_y
+        del_z = target_z - scaled_z
 
         state = np.array([
-                pose.position.x, pose.position.y, pose.position.z,
-                pose.position.x - self.last_x, pose.position.y - self.last_y, pose.position.z - self.last_z,
+                scaled_x, scaled_y, scaled_z,
+                (scaled_x - self.last_x)*10, (scaled_y - self.last_y)*10, (scaled_z - self.last_z)*10,
                 del_x, del_y, del_z])
         #print('linear_acceleration', linear_acceleration)
 
-        self.last_x = pose.position.x
-        self.last_y = pose.position.y
-        self.last_z = pose.position.z
+        self.last_x = scaled_x
+        self.last_y = scaled_y
+        self.last_z = scaled_z
 
         # Compute reward / penalty and check if this episode is complete
         done = False
@@ -73,7 +89,7 @@ class Hover(BaseTask):
         print('distance:', distance)
         print('accelerate:', accel)
 
-        reward = (10.0 - distance) * reward_alpha - accel * reward_beta
+        reward = (5.0 - distance) * reward_alpha - accel * reward_beta
 
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
