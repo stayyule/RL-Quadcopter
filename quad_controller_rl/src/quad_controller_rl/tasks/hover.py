@@ -68,8 +68,9 @@ class Hover(BaseTask):
         reward_beta = 0.1
 
         distance = np.power(np.power(del_x,2) + np.power(del_y,2) + np.power(del_z,2), 0.5)
+        accel = np.power(np.power(linear_acceleration.x,2) + np.power(linear_acceleration.y,2) + np.power(linear_acceleration.z,2), 0.5)
 
-        reward = (10.0 - distance) * reward_alpha - (linear_acceleration.x + linear_acceleration.y + linear_acceleration.z) * reward_beta
+        reward = (10.0 - distance) * reward_alpha - accel * reward_beta
 
         if timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
