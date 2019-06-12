@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0, - cube_size, - cube_size, - cube_size,           0.0,            0.0,            0.0,  0.0,  0.0,  0.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size,   cube_size,   cube_size, cube_size / 2,  cube_size / 2,  cube_size / 2, 50.0, 50.0, 50.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0,  - cube_size,          0.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size, cube_size / 2]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
