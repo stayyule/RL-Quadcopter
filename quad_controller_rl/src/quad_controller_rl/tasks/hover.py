@@ -78,7 +78,7 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 0.2
+        reward_alpha = 0.5
         reward_beta = 0.1
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
