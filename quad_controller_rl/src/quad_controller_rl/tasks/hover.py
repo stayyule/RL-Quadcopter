@@ -69,7 +69,7 @@ class Hover(BaseTask):
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_z, del_z])
-        print('state', state)
+
 
         self.last_x = scaled_x
         self.last_y = scaled_y
@@ -89,6 +89,8 @@ class Hover(BaseTask):
             reward = distance_reward - accelerate_reward
         #reward = distance_reward
         print('=====', pose.position.z ,'=====')
+        print('state:', state)
+        print('acce:', linear_acceleration.z)
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
