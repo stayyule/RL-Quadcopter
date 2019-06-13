@@ -46,8 +46,8 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 10000
-        self.batch_size = 32
+        self.buffer_size = 100000
+        self.batch_size = 2560
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
