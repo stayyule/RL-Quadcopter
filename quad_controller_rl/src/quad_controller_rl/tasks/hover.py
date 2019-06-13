@@ -12,8 +12,8 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0,  - cube_size,          0.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size, cube_size / 2]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0,  - cube_size,          0.0, -50.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size, cube_size / 2,  50.0]))
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -68,7 +68,7 @@ class Hover(BaseTask):
         vel_z = scaled_z - self.last_z
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
-                vel_z, del_z])
+                vel_z, del_z, linear_acceleration.z])
 
 
         self.last_x = scaled_x
@@ -79,10 +79,10 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.2
-        reward_beta = 10.0
+        reward_beta = 0.1
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
-        accelerate_reward = abs(vel_z) * reward_beta
+        accelerate_reward = abs(linear_acceleration.z) * reward_beta
         if pose.position.z < 5:
             reward = distance_reward
         else:
