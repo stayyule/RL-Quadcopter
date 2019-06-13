@@ -35,7 +35,7 @@ class Hover(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
 
-        self.scale = cube_size / 2
+        self.scale = self.target_z
         self.linear_vel = 0
 
 
@@ -84,7 +84,7 @@ class Hover(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 0.8
+        reward_alpha = 1
         reward_beta = 0.001
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
@@ -102,7 +102,7 @@ class Hover(BaseTask):
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
 
-        if pose.position.z > 20.0:
+        if pose.position.z > 2 * self.target_z:
             reward -= 10.0  # extra penalty
             done = True
 
