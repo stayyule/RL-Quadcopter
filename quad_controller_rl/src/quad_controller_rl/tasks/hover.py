@@ -81,7 +81,7 @@ class Hover(BaseTask):
         reward_alpha = 0.8
         reward_beta = 0.1
 
-        distance_reward = (5.0 - abs(del_z)) * reward_alpha
+        distance_reward = (10.0 - abs(del_z)) * reward_alpha
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
         if pose.position.z < 5:
             reward = distance_reward
