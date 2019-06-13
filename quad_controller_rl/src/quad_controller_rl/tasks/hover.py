@@ -91,6 +91,7 @@ class Hover(BaseTask):
         print('=====', pose.position.z ,'=====')
         print('state:', state)
         print('acce:', linear_acceleration.z)
+        print('vel_z:', vel_z)
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
