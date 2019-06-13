@@ -36,6 +36,7 @@ class Hover(BaseTask):
         self.last_z = 0.0
 
         self.scale = cube_size / 2
+        self.linear_vel = 0
 
 
     def reset(self):
@@ -74,6 +75,7 @@ class Hover(BaseTask):
         self.last_x = scaled_x
         self.last_y = scaled_y
         self.last_z = scaled_z
+        self.linear_vel += linear_acceleration.z
 
         # Compute reward / penalty and check if this episode is complete
         done = False
@@ -91,7 +93,7 @@ class Hover(BaseTask):
         print('=====', pose.position.z ,'=====')
         print('state:', state)
         print('acce:', linear_acceleration.z)
-        print('vel_z:', vel_z)
+        print('vel_z:', self.linear_vel)
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
