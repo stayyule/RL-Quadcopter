@@ -53,7 +53,14 @@ class RandomPolicySearch(BaseAgent):
 
         self.last_state = state
         self.last_action = action
-        return action
+
+        # Return complete action vector
+        complete_action = action
+        #print('action', action)
+        complete_action[0][-3:] = np.zeros(3) # linear force only
+        complete_action[0][:2] = np.zeros(2) # z only
+        return complete_action
+
 
     def act(self, state):
         # Choose action based on given state and policy
