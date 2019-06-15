@@ -12,8 +12,9 @@ class Hover(BaseTask):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
-            np.array([- cube_size / 2, - cube_size / 2,       0.0,  - cube_size,          0.0, -50.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,   cube_size, cube_size / 2,  50.0]))
+            np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))        
+            
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
@@ -35,9 +36,8 @@ class Hover(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
 
-        self.scale = self.target_z
         self.linear_vel = 0
-
+        self.scale = cube_size / 2
 
     def reset(self):
         self.last_x = 0.0
@@ -56,46 +56,37 @@ class Hover(BaseTask):
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
 
-        scaled_x = pose.position.x / self.scale
-        scaled_y = pose.position.y / self.scale
-        scaled_z = pose.position.z / self.scale - 1
-        scaled_x *= 5.0
-        scaled_y *= 5.0
-        scaled_z *= 5.0
-        target_x = self.target_x / self.scale
-        target_y = self.target_y / self.scale
-        target_z = self.target_z / self.scale - 1
-        target_x *= 5.0
-        target_x *= 5.0
-        target_z *= 5.0
+        scaled_x = pose.position.x / self.scale * 5.0
+        scaled_y = pose.position.y / self.scale * 5.0
+        scaled_z = ( pose.position.z / self.scale - 1 ) * 5.0
 
-        del_z = target_z - scaled_z
-        vel_z = scaled_z - self.last_z
+        del_z = self.target_z - pose.position.z
+        del_z = del_z / self.target_x * 5.0
+
+        vel_x = pose.position.x - self.last_x
+        vel_y = pose.position.y - self.last_y
+        vel_z = pose.position.z - self.last_z
+
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
-                vel_z, del_z, linear_acceleration.z])
+                vel_x, vel_y, vel_z, del_z ])
 
-
-        self.last_x = scaled_x
-        self.last_y = scaled_y
-        self.last_z = scaled_z
-        self.linear_vel += linear_acceleration.z
+        self.last_x = pose.position.x
+        self.last_y = pose.position.y
+        self.last_z = pose.position.z
 
         # Compute reward / penalty and check if this episode is complete
         done = False
         
         reward_alpha = 1
-        reward_beta = 0.001
+        reward_beta = 0.01
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
-        accelerate_reward = abs(self.linear_vel) * reward_beta
+        accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
         reward = distance_reward - accelerate_reward
         #reward = distance_reward
-        print('=====', pose.position.z ,'=====')
         print('state:', state)
-        print('acce:', linear_acceleration.z)
-        print('vel_z:', self.linear_vel)
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
