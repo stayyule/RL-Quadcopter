@@ -119,4 +119,5 @@ class Hover(BaseTask):
                     torque=Vector3(action[3], action[4], action[5])
                 ), done
         else:
+            print('reward:', reward)
             return Wrench(), done
