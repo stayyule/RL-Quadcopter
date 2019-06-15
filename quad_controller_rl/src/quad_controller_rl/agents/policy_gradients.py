@@ -195,9 +195,13 @@ class Actor:
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
         name='raw_actions')(net)
 
+        print('raw:', raw_actions)
+
         # Scale [0, 1] output for each action dimension to proper range
         actions = layers.Lambda(lambda x: (x * self.action_range) + self.action_low,
         name='actions')(raw_actions)
+
+        print('actions:', actions)
 
         # Create Keras model
         self.model = models.Model(inputs=states, outputs=actions)
