@@ -93,11 +93,11 @@ class Hover(BaseTask):
         else:
             reward = distance_reward - accelerate_reward
         
-        #print('height:', pose.position.z)
-        #print('state:', state)
-        #print('reward:', reward)
-        #print('distance:', distance_reward)
-        #print('accelerate:', accelerate_reward)
+        print('height:', pose.position.z)
+        print('state:', state)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
 
         if pose.position.z > 2 * self.target_z:
             reward -= 10.0  # extra penalty
@@ -119,5 +119,5 @@ class Hover(BaseTask):
                     torque=Vector3(action[3], action[4], action[5])
                 ), done
         else:
-            print('reward:', reward)
+
             return Wrench(), done
