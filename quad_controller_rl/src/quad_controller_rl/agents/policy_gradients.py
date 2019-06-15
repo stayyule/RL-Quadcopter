@@ -195,8 +195,8 @@ class Actor:
         raw_actions = layers.Dense(units=self.action_size, activation='tanh',
         name='raw_actions')(net)
 
-        # Scale [0, 1] output for each action dimension to proper range
-        actions = layers.Lambda(lambda x: (x * self.action_range) + self.action_low,
+        # Scale [-1, 1] output for each action dimension to proper range
+        actions = layers.Lambda(lambda x: x * self.action_range / 2,
         name='actions')(raw_actions)
 
         # Create Keras model
