@@ -61,7 +61,7 @@ class Hover(BaseTask):
 
         scaled_x = pose.position.x / self.scale * 5.0
         scaled_y = pose.position.y / self.scale * 5.0
-        scaled_z = ( pose.position.z / self.scale - 1 ) * 5.0
+        scaled_z = pose.position.z / self.scale * 5.0
 
         del_z = self.target_z - pose.position.z
         del_z = del_z / self.target_z * 5.0
@@ -83,18 +83,18 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 1
-        reward_beta = 1
+        reward_beta = 0.8
 
         distance_reward = (5.0 - abs(del_z)) * reward_alpha
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
         reward = distance_reward - accelerate_reward
         
-        #print('height:', pose.position.z)
+        print('height:', pose.position.z)
         #print('state:', state)
-        #print('reward:', reward)
-        #print('distance:', distance_reward)
-        #print('accelerate:', accelerate_reward)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
