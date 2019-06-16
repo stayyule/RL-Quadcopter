@@ -90,18 +90,14 @@ class Hover(BaseTask):
 
         reward = distance_reward - accelerate_reward
         
-        print('height:', pose.position.z)
-        print('state:', state)
-        print('reward:', reward)
-        print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)
-
-        if pose.position.z > 2 * self.target_z:
-            reward -= 10.0  # extra penalty
-            done = True
+        #print('height:', pose.position.z)
+        #print('state:', state)
+        #print('reward:', reward)
+        #print('distance:', distance_reward)
+        #print('accelerate:', accelerate_reward)
 
         if timestamp > self.max_duration:  # agent has run out of time
-            reward -= 10.0  # extra penalty
+            #reward -= 10.0  # extra penalty
             done = True
 
         # Take one RL step, passing in current state and reward, and obtain action
