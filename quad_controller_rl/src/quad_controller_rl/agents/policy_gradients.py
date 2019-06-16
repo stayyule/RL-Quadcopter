@@ -73,7 +73,7 @@ class DDPG(BaseAgent):
     def step(self, state, reward, done):
 
         # Choose an action
-        action = self.act(state)
+        action = self.act(state) * self.action_range / 2
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -192,12 +192,12 @@ class Actor:
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Add final output layer with sigmoid activation
-        raw_actions = layers.Dense(units=self.action_size, activation='tanh',
+        actions = layers.Dense(units=self.action_size, activation='tanh',
         name='raw_actions')(net)
 
         # Scale [-1, 1] output for each action dimension to proper range
-        actions = layers.Lambda(lambda x: x * self.action_range / 2,
-        name='actions')(raw_actions)
+        #actions = layers.Lambda(lambda x: x * self.action_range / 2,
+        #name='actions')(raw_actions)
 
         # Create Keras model
         self.model = models.Model(inputs=states, outputs=actions)
