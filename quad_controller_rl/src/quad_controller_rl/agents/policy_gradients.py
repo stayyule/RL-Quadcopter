@@ -319,10 +319,14 @@ class ReplayBuffer:
             self.idx = (self.idx + 1) % self.size
     
     def sample(self, batch_size=64):
-        """Randomly sample a batch of experiences from memory."""
-        return random.sample(self.memory, k=batch_size)
+        sorted(self.memory, key=get_reward, reserve=True)
+        return self.memory[:batch_size]
+        #"""Randomly sample a batch of experiences from memory."""
+        #return random.sample(self.memory, k=batch_size)
 
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
 
+    def get_reward(self, exp):
+        return exp[2]
