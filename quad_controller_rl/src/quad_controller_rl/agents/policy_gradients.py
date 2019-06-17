@@ -319,7 +319,7 @@ class ReplayBuffer:
             self.idx = (self.idx + 1) % self.size
     
     def sample(self, batch_size=64):
-        sorted(self.memory, key=self.get_reward, reserve=True)
+        sorted(self.memory, key=self.get_reward, reverse=True)
         return self.memory[:batch_size]
         #"""Randomly sample a batch of experiences from memory."""
         #return random.sample(self.memory, k=batch_size)
