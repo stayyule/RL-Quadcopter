@@ -29,7 +29,7 @@ class Hover(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 10.0  # secs
+        self.max_duration = 8.0  # secs
 
         self.target_x = 0.0
         self.target_y = 0.0
