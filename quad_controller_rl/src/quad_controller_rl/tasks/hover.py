@@ -64,9 +64,9 @@ class Hover(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
-        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
-        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
-        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+        del_x = self.target_x - pose.position.x
+        del_y = self.target_y - pose.position.y
+        del_z = self.target_z - pose.position.z
 
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
