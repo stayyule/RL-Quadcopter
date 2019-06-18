@@ -11,12 +11,9 @@ class Hover(BaseTask):
     def __init__(self):
         # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
-        #self.observation_space = spaces.Box(
-        #    np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
-        #    np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))        
         self.observation_space = spaces.Box(
-            np.array([- 5.0, - 5.0,  0.0, - 10.0, - 10.0, -10.0,  0.0]),
-            np.array([  5.0,   5.0, 10.0,   10.0,   10.0,  10.0, 10.0]))        
+            np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))        
             
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
@@ -63,16 +60,18 @@ class Hover(BaseTask):
         scaled_y = pose.position.y / self.scale * 5.0
         scaled_z = pose.position.z / self.scale * 5.0
 
-        del_z = self.target_z - pose.position.z
-        del_z = del_z / self.target_z * 5.0
-
         vel_x = pose.position.x - self.last_x
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
+        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
+        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
+        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
-                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0, del_z ])
+                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+                del_z ])
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y
@@ -84,8 +83,9 @@ class Hover(BaseTask):
         
         reward_alpha = 1
         reward_beta = 0.3
+        distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
-        distance_reward = (5.0 - abs(del_z)) * reward_alpha
+        distance_reward = (5.0 - distance) * reward_alpha
         if pose.position.z < 1:
             accelerate_reward = 0
         else:
@@ -94,7 +94,7 @@ class Hover(BaseTask):
             else:
                 accelerate_reward = linear_acceleration.z * reward_beta
 
-        reward = distance_reward - accelerate_reward
+        #reward = distance_reward - abs(accelerate_reward)
         
         print('height:', pose.position.z)
         #print('state:', state)
