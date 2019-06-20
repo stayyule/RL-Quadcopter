@@ -9,7 +9,6 @@ class Hover(BaseTask):
     """Simple task where the goal is to lift off the ground and reach a target height."""
 
     def __init__(self):
-        # State space: <position_x, .._y, .._z, delta position_x, .._y, .._z, linear_acceration_x, .._y, .._z>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
             np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
@@ -64,14 +63,14 @@ class Hover(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
-        del_x = self.target_x - pose.position.x
-        del_y = self.target_y - pose.position.y
-        del_z = self.target_z - pose.position.z
+        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
+        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
+        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-                del_z ])
+                del_x, del_y, del_z ])
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y

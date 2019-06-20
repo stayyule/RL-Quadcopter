@@ -22,8 +22,8 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        self.state_size = np.prod(self.task.observation_space.shape)
-        self.action_size = np.prod(self.task.action_space.shape)
+        self.state_size = 9
+        self.action_size = 1
 
         self.state_range = self.task.observation_space.high - self.task.observation_space.low
         self.action_range = self.task.action_space.high - self.task.action_space.low
@@ -46,7 +46,7 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 100000
+        self.buffer_size = 10000
         self.batch_size = 128
         self.memory = ReplayBuffer(self.buffer_size)
 
@@ -98,13 +98,13 @@ class DDPG(BaseAgent):
         self.last_action = action
 
         # Return complete action vector
-        complete_action = action
+        #complete_action = action
         #print('action', action)
-        complete_action[0][-3:] = np.zeros(3) # linear force only
-        complete_action[0][:2] = np.zeros(2) # z only
-        return complete_action
+        #complete_action[0][-3:] = np.zeros(3) # linear force only
+        #complete_action[0][:2] = np.zeros(2) # z only
+        #return complete_action
         #print("actions:", action)
-        #return action
+        return action
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""
