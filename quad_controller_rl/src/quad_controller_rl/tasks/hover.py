@@ -36,7 +36,7 @@ class Hover(BaseTask):
         self.last_z = 0.0
 
         self.linear_vel = 0
-        self.scale = cube_size / 2
+        self.scale = 15
 
     def reset(self):
         self.last_x = 0.0
