@@ -97,13 +97,12 @@ class Hover(BaseTask):
 
         reward = distance_reward - accelerate_reward
         
-        if pose.position.z > 8:
-            print('==========')
-            print('height:', pose.position.z)
-            #print('state:', state)
-            print('reward:', reward)
-            print('distance:', distance_reward)
-            print('accelerate:', accelerate_reward)
+        #print('==========')
+        #print('height:', pose.position.z)
+        #print('state:', state)
+        #print('reward:', reward)
+        #print('distance:', distance_reward)
+        #print('accelerate:', accelerate_reward)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
