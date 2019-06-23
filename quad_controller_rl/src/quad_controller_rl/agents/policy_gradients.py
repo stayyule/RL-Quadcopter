@@ -25,12 +25,12 @@ class DDPG(BaseAgent):
         self.state_size = 9
         self.action_size = 1
 
-        self.state_range = self.task.observation_space.high - self.task.observation_space.low
-        self.action_range = self.task.action_space.high - self.task.action_space.low
+        #self.state_range = self.task.observation_space.high - self.task.observation_space.low
+        self.action_range = 50
 
         # Actor (Policy) Model
-        self.action_low = self.task.action_space.low
-        self.action_high = self.task.action_space.high
+        self.action_low = -25
+        self.action_high = 25
         self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
         self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
 
