@@ -46,13 +46,13 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 10000
-        self.batch_size = 128
+        self.buffer_size = 100000
+        self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
-        self.gamma = 0.8 # discount factor
-        self.tau = 0.01 # for soft update of target parameters
+        self.gamma = 0.9 # discount factor
+        self.tau = 0.1 # for soft update of target parameters
 
         self.reset_episode_vars()
 
