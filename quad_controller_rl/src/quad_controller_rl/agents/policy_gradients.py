@@ -104,7 +104,7 @@ class DDPG(BaseAgent):
         #complete_action[0][-3:] = np.zeros(3) # linear force only
         #complete_action[0][:2] = np.zeros(2) # z only
         #return complete_action
-        print(complete_action.reshape(1,-1))
+        #print(complete_action.reshape(1,-1))
         return complete_action.reshape(1,-1)
 
     def act(self, states):
