@@ -111,7 +111,7 @@ class DDPG(BaseAgent):
 
         noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
 
-        return round(actions + noise_epsilon * noise_val,2) # add some noise for exploration
+        return np.around(actions + noise_epsilon * noise_val, decimals=2) # add some noise for exploration
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
