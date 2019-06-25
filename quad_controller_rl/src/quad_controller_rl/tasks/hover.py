@@ -114,7 +114,7 @@ class Hover(BaseTask):
         print("next action:", action)
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
-            action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
+            #action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
             return Wrench(
                     force=Vector3(action[0], action[1], action[2]),
                     torque=Vector3(action[3], action[4], action[5])

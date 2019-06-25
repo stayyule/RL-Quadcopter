@@ -97,8 +97,8 @@ class DDPG(BaseAgent):
         # Return complete action vector
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
-        print('step action:', complete_action.reshape(1,-1))
-        return complete_action.reshape(1,-1)
+        #print('step action:', complete_action.reshape(1,-1))
+        return np.clip(complete_action.reshape(1,-1).flatten(), -1.0, 1.0)
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""
