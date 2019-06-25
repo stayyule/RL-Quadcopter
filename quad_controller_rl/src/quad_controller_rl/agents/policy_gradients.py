@@ -146,9 +146,6 @@ class DDPG(BaseAgent):
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
         target_model.set_weights(new_weights)
-        print('local:', local_weights)
-        print('target:', target_model)
-        print('new:', new_weights)
 
     def write_stats(self, stats):
         """Write single episode stats to CSV file."""
