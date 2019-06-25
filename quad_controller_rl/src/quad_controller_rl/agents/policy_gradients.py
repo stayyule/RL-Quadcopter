@@ -51,8 +51,8 @@ class DDPG(BaseAgent):
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
-        self.gamma = 0.9 # discount factor
-        self.tau = 0.1 # for soft update of target parameters
+        self.gamma = 0.99 # discount factor
+        self.tau = 0.001 # for soft update of target parameters
 
         self.reset_episode_vars()
 
@@ -114,7 +114,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         #print("noise:", self.noise.sample())
-        return actions + 0.1 * self.noise.sample() # add some noise for exploration
+        return actions + self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
