@@ -113,7 +113,7 @@ class DDPG(BaseAgent):
         states = np.reshape(states, [-1, self.state_size])
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
-        print("noise:", self.noise.sample())
+        #print("noise:", self.noise.sample())
         return actions + 0.1 * self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
