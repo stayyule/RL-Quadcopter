@@ -107,7 +107,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
-        #print("action:", actions, "noise:", noise_val)
+        print("action:", actions, "noise:", noise_val)
 
         noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
 
