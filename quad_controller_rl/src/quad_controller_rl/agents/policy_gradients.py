@@ -114,7 +114,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         print("noise:", self.noise.sample())
-        return actions + self.noise.sample() # add some noise for exploration
+        return actions + 0.1 * self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
