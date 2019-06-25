@@ -51,7 +51,7 @@ class DDPG(BaseAgent):
 
         self.reset_episode_vars()
 
-        self.epsilon = 0.1
+        self.epsilon = 0.5
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -109,7 +109,7 @@ class DDPG(BaseAgent):
         noise_val = self.noise.sample()
         #print("action:", actions, "noise:", noise_val)
 
-        noise_epsilon = self.epsilon / ( int(self.episode_num / 50 ) + 1)
+        noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
 
         return actions + noise_epsilon * noise_val # add some noise for exploration
 
