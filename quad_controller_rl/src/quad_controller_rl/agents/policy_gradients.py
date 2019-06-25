@@ -56,6 +56,8 @@ class DDPG(BaseAgent):
 
         self.reset_episode_vars()
 
+        self.epsilon = 1.0
+
         # Save episode stats
         self.stats_filename = os.path.join(
             util.get_param('out'),
@@ -113,8 +115,11 @@ class DDPG(BaseAgent):
         states = np.reshape(states, [-1, self.state_size])
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
-        #print("noise:", self.noise.sample())
-        return actions + self.noise.sample() # add some noise for exploration
+        #print("action:", actions, "noise:", self.noise.sample())
+
+        noise_epsilon = 1 / ( int(self.episode_num / 10 ) + 1)
+
+        return actions + noise_epsilon * self.noise.sample() # add some noise for exploration
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
