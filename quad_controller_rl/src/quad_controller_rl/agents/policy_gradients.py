@@ -47,7 +47,7 @@ class DDPG(BaseAgent):
 
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
-        self.tau = 0.05 # for soft update of target parameters
+        self.tau = 0.1 # for soft update of target parameters
 
         self.reset_episode_vars()
 
@@ -122,6 +122,8 @@ class DDPG(BaseAgent):
         dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1, 1)
         next_states = np.vstack([e.next_state for e in experiences if e is not None])
 
+        print("states:", states)
+        print("next states:", next_states)
         # Get predicted next-state actions and Q values from target models
         # Q_targets_next = critic_target(next_state, actor_target(next_state))
         actions_next = self.actor_target.model.predict_on_batch(next_states)
