@@ -47,7 +47,7 @@ class DDPG(BaseAgent):
 
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
-        self.tau = 0.001 # for soft update of target parameters
+        self.tau = 0.05 # for soft update of target parameters
 
         self.reset_episode_vars()
 
@@ -105,9 +105,9 @@ class DDPG(BaseAgent):
         states = np.reshape(states, [-1, self.state_size])
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
-        print("action:", actions, "noise:", self.noise.sample())
+        #print("action:", actions, "noise:", self.noise.sample())
 
-        noise_epsilon = 1 / ( int(self.episode_num / 50 ) + 1)
+        noise_epsilon = self.epsilon / ( int(self.episode_num / 50 ) + 1)
 
         return actions + noise_epsilon * self.noise.sample() # add some noise for exploration
 
@@ -305,6 +305,7 @@ class ReplayBuffer:
     def add(self, state, action, reward, next_state, done):
         """Add a new experience to memory."""
         e = Experience(state, action, reward, next_state, done)
+        print(e)
         if len(self.memory) < self.size:
             self.memory.append(e)
         else:
