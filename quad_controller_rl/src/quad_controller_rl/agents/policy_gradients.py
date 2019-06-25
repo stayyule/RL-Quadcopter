@@ -122,8 +122,6 @@ class DDPG(BaseAgent):
         dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1, 1)
         next_states = np.vstack([e.next_state for e in experiences if e is not None])
 
-        print("states:", states)
-        print("next states:", next_states)
         # Get predicted next-state actions and Q values from target models
         # Q_targets_next = critic_target(next_state, actor_target(next_state))
         actions_next = self.actor_target.model.predict_on_batch(next_states)
@@ -148,6 +146,9 @@ class DDPG(BaseAgent):
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
         target_model.set_weights(new_weights)
+        print('local:', local_weights)
+        print('target:', target_model)
+        print('new:', new_weights)
 
     def write_stats(self, stats):
         """Write single episode stats to CSV file."""
