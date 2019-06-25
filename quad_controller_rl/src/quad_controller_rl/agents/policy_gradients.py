@@ -25,14 +25,9 @@ class DDPG(BaseAgent):
         self.state_size = 9
         self.action_size = 1
 
-        #self.state_range = self.task.observation_space.high - self.task.observation_space.low
-        self.action_range = 50
-
         # Actor (Policy) Model
-        self.action_low = -25
-        self.action_high = 25
-        self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
-        self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+        self.actor_local = Actor(self.state_size, self.action_size)
+        self.actor_target = Actor(self.state_size, self.action_size)
 
         # Critic (Value) Model
         self.critic_local = Critic(self.state_size, self.action_size)
@@ -75,7 +70,7 @@ class DDPG(BaseAgent):
     def step(self, state, reward, done):
 
         # Choose an action
-        action = self.act(state) * self.action_range / 2
+        action = self.act(state) 
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -102,11 +97,6 @@ class DDPG(BaseAgent):
         # Return complete action vector
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
-        #print('action', action)
-        #complete_action[0][-3:] = np.zeros(3) # linear force only
-        #complete_action[0][:2] = np.zeros(2) # z only
-        #return complete_action
-        #print(complete_action.reshape(1,-1))
         return complete_action.reshape(1,-1)
 
     def act(self, states):
@@ -165,7 +155,7 @@ class DDPG(BaseAgent):
 class Actor:
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, action_low, action_high):
+    def __init__(self, state_size, action_size):
         """Initialize parameters and build model.
 
         Params
@@ -177,9 +167,6 @@ class Actor:
         """
         self.state_size = state_size
         self.action_size = action_size
-        self.action_low = action_low
-        self.action_high = action_high
-        self.action_range = self.action_high - self.action_low
 
         # Initialize any other variables here
 
