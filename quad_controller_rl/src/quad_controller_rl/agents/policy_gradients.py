@@ -97,6 +97,7 @@ class DDPG(BaseAgent):
         # Return complete action vector
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
+        print('step action:', complete_action.reshape(1,-1))
         return complete_action.reshape(1,-1)
 
     def act(self, states):
@@ -106,7 +107,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
-        print("action:", actions, "noise:", noise_val)
+        #print("action:", actions, "noise:", noise_val)
 
         noise_epsilon = self.epsilon / ( int(self.episode_num / 50 ) + 1)
 
