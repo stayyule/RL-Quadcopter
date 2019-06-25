@@ -82,7 +82,7 @@ class DDPG(BaseAgent):
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
             experiences = self.memory.sample(self.batch_size)
-            print('experience:', experiences)
+            #print('experience:', experiences)
             self.learn(experiences)
         #...
         if done:
@@ -111,7 +111,7 @@ class DDPG(BaseAgent):
 
         noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
 
-        return actions + noise_epsilon * noise_val # add some noise for exploration
+        return round(actions + noise_epsilon * noise_val,2) # add some noise for exploration
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
