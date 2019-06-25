@@ -51,7 +51,7 @@ class DDPG(BaseAgent):
 
         self.reset_episode_vars()
 
-        self.epsilon = 0.8
+        self.epsilon = 0.1
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -307,7 +307,7 @@ class ReplayBuffer:
     def add(self, state, action, reward, next_state, done):
         """Add a new experience to memory."""
         e = Experience(state, action, reward, next_state, done)
-        print(e)
+        #print(e)
         if len(self.memory) < self.size:
             self.memory.append(e)
         else:
