@@ -41,12 +41,13 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 100000
-        self.batch_size = 128
+        self.buffer_size = 1000000
+        self.play_start_size = 10000
+        self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
-        self.gamma = 0.9 # discount factor
+        self.gamma = 0.99 # discount factor
         self.tau = 0.001 # for soft update of target parameters
 
         self.reset_episode_vars()
@@ -89,7 +90,7 @@ class DDPG(BaseAgent):
 
         #...
         # Learn, if enough samples are available in memory
-        if len(self.memory) > self.batch_size:
+        if len(self.memory) > self.play_start_size:
             experiences = self.memory.sample(self.batch_size)
             #print('experience:', experiences)
             self.learn(experiences)
@@ -224,7 +225,7 @@ class Actor:
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.001)
+        optimizer = optimizers.Adam(lr=0.0001)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss, constraints=[])
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
