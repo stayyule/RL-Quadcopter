@@ -42,7 +42,7 @@ class DDPG(BaseAgent):
 
         # Replay memory
         self.buffer_size = 100000
-        self.batch_size = 64
+        self.batch_size = 128
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
@@ -100,7 +100,7 @@ class DDPG(BaseAgent):
             self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
             self.episode_num += 1
             self.reset_episode_vars()
-            print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
+            #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
 
         self.last_state = state
         self.last_action = action
@@ -118,7 +118,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
-        #print("action:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2))
+        print("action:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2))
 
         #noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
         #if len(self.memory) > self.batch_size:
