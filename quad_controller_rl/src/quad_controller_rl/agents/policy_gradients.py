@@ -58,7 +58,7 @@ class DDPG(BaseAgent):
 
         self.reset_episode_vars()
 
-        self.epsilon = 1
+        self.epsilon = 0.25
         self.episode_num = 1
 
         # Save episode stats
