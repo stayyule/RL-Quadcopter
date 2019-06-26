@@ -24,9 +24,9 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        if self.task is Takeoff:
+        if isinstance(self.task, Takeoff):
             self.state_size = 7
-        if self.task is Hover:
+        if isinstance(self.task, Hover):
             self.state_size = 9
 
         self.action_size = 1
@@ -227,10 +227,10 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
         
-        if self.task is Takeoff:
+        if isinstance(self.task, Takeoff):
             loss = K.mean(-action_gradients * actions)
 
-        if self.task is Hover:
+        if isinstance(self.task, Hover):
             loss = K.mean(action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
