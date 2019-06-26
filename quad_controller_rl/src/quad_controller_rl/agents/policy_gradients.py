@@ -227,7 +227,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
         
-        if self.task is Hover:
+        if self.task is Takeoff:
             loss = K.mean(-action_gradients * actions)
 
         if self.task is Hover:
