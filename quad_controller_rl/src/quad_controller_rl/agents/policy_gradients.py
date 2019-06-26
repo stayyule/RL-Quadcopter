@@ -148,10 +148,11 @@ class DDPG(BaseAgent):
 
         #self.soft_update(self.actor_local.model, self.actor_target.model)
         local_weights = np.array(self.actor_local.model.get_weights())
-        target_weights = np.array(self.actor_target.get_weights())
+        target_weights = np.array(self.actor_target.model.get_weights())
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        self.actor_target.set_weights(new_weights)
+        print(new_weights)
+        self.actor_target.model.set_weights(new_weights)
 
     def write_stats(self, stats):
         """Write single episode stats to CSV file."""
