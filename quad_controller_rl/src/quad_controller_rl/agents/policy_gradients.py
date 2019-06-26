@@ -98,7 +98,7 @@ class DDPG(BaseAgent):
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
             experiences = self.memory.sample(self.batch_size)
-            print('experience:', experiences)
+            #print('experience:', experiences)
             self.learn(experiences)
         #...
         if done:
