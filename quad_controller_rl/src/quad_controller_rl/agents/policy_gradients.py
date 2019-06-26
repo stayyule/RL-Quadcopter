@@ -47,8 +47,8 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 1000
-        self.play_start_size = 100
+        self.buffer_size = 10000
+        self.play_start_size = 1000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size)
 
@@ -104,7 +104,8 @@ class DDPG(BaseAgent):
         #...
         if done:
             # Write episode stats
-            print('episode ', self.episode_num, ' step count: ', self.count)
+            # 241
+            #print('episode ', self.episode_num, ' step count: ', self.count)
             self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
             self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
             self.episode_num += 1
@@ -135,7 +136,7 @@ class DDPG(BaseAgent):
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
         final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
-        #print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
+        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
 
         return final_action
 
