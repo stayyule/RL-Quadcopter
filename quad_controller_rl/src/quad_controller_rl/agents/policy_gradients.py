@@ -52,19 +52,28 @@ class DDPG(BaseAgent):
         self.reset_episode_vars()
 
         self.epsilon = 1
+        self.episode_num = 1
 
         # Save episode stats
         self.stats_filename = os.path.join(
             util.get_param('out'),
             "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
         self.stats_columns = ['episode', 'total_reward']  # specify columns to save
-        self.episode_num = 1
         print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
+
+        # Save Q stats
+        self.q_stats_filename = os.path.join(
+            util.get_param('out'),
+            "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        self.q_stats_columns = ['episode', 'Q_value']  # specify columns to save
+        print("Saving q stats {} to {}".format(self.q_stats_columns, self.q_stats_filename))  # [debug]
+
 
     def reset_episode_vars(self):
         self.last_state = None
         self.last_action = None
         self.total_reward = 0.0
+        self.total_q = 0.0
         self.count = 0
 
     def step(self, state, reward, done):
@@ -87,9 +96,11 @@ class DDPG(BaseAgent):
         #...
         if done:
             # Write episode stats
-            self.write_stats([self.episode_num, self.total_reward])
+            self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
+            self.write_stats([self.episode_num, self.total_q], q_stats_filename)
             self.episode_num += 1
             self.reset_episode_vars()
+            print('model:', self.actor_target.model.get_weights().reshape(1))
 
         self.last_state = state
         self.last_action = action
@@ -128,6 +139,7 @@ class DDPG(BaseAgent):
         # Q_targets_next = critic_target(next_state, actor_target(next_state))
         actions_next = self.actor_target.model.predict_on_batch(next_states)
         Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
+        self.total_q += Q_targets_next
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
@@ -143,7 +155,6 @@ class DDPG(BaseAgent):
         target_weights = np.array(self.critic_target.model.get_weights())
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        print(new_weights)
         self.critic_target.model.set_weights(new_weights)
 
         #self.soft_update(self.actor_local.model, self.actor_target.model)
@@ -151,14 +162,13 @@ class DDPG(BaseAgent):
         target_weights = np.array(self.actor_target.model.get_weights())
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        print(new_weights)
         self.actor_target.model.set_weights(new_weights)
 
-    def write_stats(self, stats):
+    def write_stats(self, stats, file_name):
         """Write single episode stats to CSV file."""
         df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
-        df_stats.to_csv(self.stats_filename, mode='a', index=False,
-            header=not os.path.isfile(self.stats_filename))  # write header first time only
+        df_stats.to_csv(file_name, mode='a', index=False,
+            header=not os.path.isfile(file_name))  # write header first time only
 
 
 class Actor:
