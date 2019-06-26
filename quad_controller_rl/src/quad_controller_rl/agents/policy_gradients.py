@@ -42,7 +42,7 @@ class DDPG(BaseAgent):
 
         # Replay memory
         self.buffer_size = 1000000
-        self.play_start_size = 10000
+        self.play_start_size = 1000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size)
 
