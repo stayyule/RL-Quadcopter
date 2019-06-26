@@ -58,8 +58,9 @@ class DDPG(BaseAgent):
 
         self.reset_episode_vars()
 
-        self.epsilon = 1
+        self.epsilon = 1.0
         self.episode_num = 1
+        self.count = 0
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -108,6 +109,7 @@ class DDPG(BaseAgent):
             self.episode_num += 1
             self.reset_episode_vars()
             #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
+            print('episode ', self.episode_num, ' step count: ', self.count)
 
         self.last_state = state
         self.last_action = action
@@ -132,7 +134,7 @@ class DDPG(BaseAgent):
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
         final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
-        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
+        #print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
 
         return final_action
 
@@ -348,7 +350,7 @@ class ReplayBuffer:
 
         """Randomly sample a batch of experiences from memory."""
         #return random.sample(self.memory, k=batch_size)
-        sorted(self.memory, key=self.get_reward, reverse=True)
+        self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
         return self.memory[:batch_size]
 
     def __len__(self):
