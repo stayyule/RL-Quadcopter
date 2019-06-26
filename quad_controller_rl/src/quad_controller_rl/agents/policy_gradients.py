@@ -70,7 +70,7 @@ class DDPG(BaseAgent):
     def step(self, state, reward, done):
 
         # Choose an action
-        action = self.act(state) 
+        action = np.clip(self.act(state) * 25, -25, 25)
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -98,7 +98,7 @@ class DDPG(BaseAgent):
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
         #print('step action:', complete_action.reshape(1,-1))
-        return np.clip(complete_action.reshape(1,-1).flatten(), -1.0, 1.0)
+        return complete_action
 
     def act(self, states):
         """Returns actions for given state(s) as per current policy."""

@@ -110,7 +110,7 @@ class Hover(BaseTask):
 
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
-        action = self.agent.step(state, reward, done) * self.action_space.high # note: action = <force; torque> vector
+        action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
         #print("next action:", action)
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
