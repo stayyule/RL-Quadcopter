@@ -97,7 +97,7 @@ class DDPG(BaseAgent):
         if done:
             # Write episode stats
             self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
-            self.write_stats([self.episode_num, self.total_q], q_stats_filename)
+            self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
             self.episode_num += 1
             self.reset_episode_vars()
             print('model:', self.actor_target.model.get_weights().reshape(1))
