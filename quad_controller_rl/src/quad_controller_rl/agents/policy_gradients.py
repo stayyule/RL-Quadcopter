@@ -119,7 +119,7 @@ class DDPG(BaseAgent):
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
         #print('step action:', complete_action.reshape(1,-1))
-        return complete_action
+        return complete_action * 25
 
     def act(self, states):
         """Returns actions [-1,1] for given state(s) as per current policy."""
