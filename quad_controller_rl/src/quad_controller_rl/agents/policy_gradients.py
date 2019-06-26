@@ -1,5 +1,7 @@
 import numpy as np
 from quad_controller_rl.agents.base_agent import BaseAgent
+from quad_controller_rl.tasks.takeoff import Takeoff
+from quad_controller_rl.tasks.hover import Hover
 
 from keras import layers, models, optimizers
 from keras import backend as K
@@ -22,7 +24,11 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        self.state_size = 9
+        if self.task is Takeoff:
+            self.state_size = 7
+        if self.task is Hover:
+            self.state_size = 9
+
         self.action_size = 1
 
         # Actor (Policy) Model
@@ -220,7 +226,12 @@ class Actor:
 
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
-        loss = K.mean(-action_gradients * actions)
+        
+        if self.task is Hover:
+            loss = K.mean(-action_gradients * actions)
+
+        if self.task is Hover:
+            loss = K.mean(action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
