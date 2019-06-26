@@ -80,7 +80,7 @@ class DDPG(BaseAgent):
     def step(self, state, reward, done):
 
         # Choose an action
-        action = np.clip(self.act(state), -1, 1)
+        action = self.act(state)
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -125,7 +125,7 @@ class DDPG(BaseAgent):
         #    return np.around(actions + noise_epsilon * noise_val, decimals=2) # add some noise for exploration
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
-        final_action = np.around(actions + noise_val * noise_epsilon, decimals=2)
+        final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
         print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
 
         return final_action
