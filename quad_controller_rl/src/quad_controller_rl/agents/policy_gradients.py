@@ -100,7 +100,7 @@ class DDPG(BaseAgent):
             self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
             self.episode_num += 1
             self.reset_episode_vars()
-            print('model:', self.actor_target.model.get_weights().reshape(1))
+            print('model:', np.array(self.actor_target.model.get_weights()).reshape(1))
 
         self.last_state = state
         self.last_action = action
