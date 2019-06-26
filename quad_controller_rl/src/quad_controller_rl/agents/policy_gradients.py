@@ -232,7 +232,7 @@ class Actor:
         
         #loss = K.mean(-action_gradients * actions)
 
-        loss = -1 * K.mean(action_gradients * actions)
+        loss = K.mean(action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
