@@ -48,7 +48,6 @@ class DDPG(BaseAgent):
 
         # Replay memory
         self.buffer_size = 10000
-        self.play_start_size = 1000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size)
 
@@ -97,9 +96,9 @@ class DDPG(BaseAgent):
 
         #...
         # Learn, if enough samples are available in memory
-        if len(self.memory) > self.play_start_size:
+        if len(self.memory) > self.batch_size:
             experiences = self.memory.sample(self.batch_size)
-            #print('experience:', experiences)
+            print('experience:', experiences)
             self.learn(experiences)
         #...
         if done:
