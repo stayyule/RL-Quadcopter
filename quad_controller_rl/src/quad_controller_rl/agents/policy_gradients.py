@@ -107,7 +107,7 @@ class DDPG(BaseAgent):
         #print('states with shape:', states)
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
-        print("action:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2))
+        #print("action:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2))
 
         noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
         if len(self.memory) > self.batch_size:
@@ -138,16 +138,20 @@ class DDPG(BaseAgent):
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
 
         # Soft-update target models
-        self.soft_update(self.critic_local.model, self.critic_target.model)
-        self.soft_update(self.actor_local.model, self.actor_target.model)
-
-    def soft_update(self, local_model, target_model):
-        """Soft update model parameters."""
-        local_weights = np.array(local_model.get_weights())
-        target_weights = np.array(target_model.get_weights())
+        #self.soft_update(self.critic_local.model, self.critic_target.model)
+        local_weights = np.array(self.critic_local.model.get_weights())
+        target_weights = np.array(self.critic_target.model.get_weights())
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        target_model.set_weights(new_weights)
+        print(new_weights)
+        self.critic_target.model.set_weights(new_weights)
+
+        #self.soft_update(self.actor_local.model, self.actor_target.model)
+        local_weights = np.array(self.actor_local.model.get_weights())
+        target_weights = np.array(self.actor_target.get_weights())
+
+        new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
+        self.actor_target.set_weights(new_weights)
 
     def write_stats(self, stats):
         """Write single episode stats to CSV file."""
