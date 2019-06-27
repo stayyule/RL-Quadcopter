@@ -37,7 +37,7 @@ class TD(BaseAgent):
 
     def step(self, state, reward, done):
         # Transform state vector
-        state = state.reshape(1, -1)[2]  # convert to row vector
+        state = state.reshape(1, -1)  # convert to row vector
         print('state:', state)
 
         # Choose an action
