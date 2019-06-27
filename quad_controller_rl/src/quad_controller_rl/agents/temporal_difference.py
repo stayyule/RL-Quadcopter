@@ -70,7 +70,7 @@ class TD(BaseAgent):
 
         # Return complete action vector
         complete_action = (action + 1) * 5.0
-        print('action:', action, '-', complete_action)
+        #print('action:', action, '-', complete_action)
         return np.array([[0, 0, complete_action, 0, 0, 0]])
 
 
