@@ -75,11 +75,11 @@ class TD(BaseAgent):
         action = np.random.choice(np.arrange(self.action_space), p=policy_s)
         return action
 
-    def update_Q(Qsa, Qsa_next, reward, alpha = 0.001, gamma = 0.99):
+    def update_Q(self, Qsa, Qsa_next, reward, alpha = 0.001, gamma = 0.99):
         """ updates the action-value function estimate using the most recent time step """
         return Qsa + (alpha * (reward + (gamma * Qsa_next) - Qsa))
 
-    def epsilon_greedy_probs(Q_s, i_episode):
+    def epsilon_greedy_probs(self, Q_s, i_episode):
         """ obtains the action probabilities corresponding to epsilon-greedy policy """
         epsilon = 1.0 / i_episode
         policy_s = np.ones(self.action_space) * epsilon / self.action_space
