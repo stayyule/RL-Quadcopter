@@ -39,9 +39,11 @@ class TD(BaseAgent):
     def step(self, state, reward, done):
             
         # Transform state vector
-        state = state.flatten()  # convert to row vector
+        state_array = state.flatten()  # convert to row vector
         #print('state:', state)
-
+        state = ''
+        for s in state_array:
+            state += str(s)
 
         if self.count < self.step_count and self.last_action is not None:
             action = self.last_action
