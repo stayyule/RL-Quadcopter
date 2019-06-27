@@ -55,7 +55,7 @@ class Hover_TD(BaseTask):
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
-        state = np.around(np.array([scaled_z]), decimals=0)
+        state = np.around(np.array([scaled_x, scaled_y, scaled_z]), decimals=0)
 
         # Compute reward / penalty and check if this episode is complete
         done = False

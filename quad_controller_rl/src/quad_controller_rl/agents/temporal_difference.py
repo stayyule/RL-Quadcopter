@@ -1,4 +1,4 @@
-from collections import defaultdict, deque, namedtuple
+from collections import defaultdict
 import sys, os
 import numpy as np
 from quad_controller_rl import util
@@ -37,7 +37,7 @@ class TD(BaseAgent):
 
     def step(self, state, reward, done):
         # Transform state vector
-        state = state.reshape(1, -1)  # convert to row vector
+        state = state.reshape(1, -1)[2]  # convert to row vector
         print('state:', state)
 
         # Choose an action
@@ -45,20 +45,20 @@ class TD(BaseAgent):
         
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
-            self.Q[last_state][last_action] = update_Q(self.Q[last_state][last_action], self.Q[state][action], last_reward)
+            self.Q[last_state][last_action] = self.update_Q(self.Q[last_state][last_action], self.Q[state][action], last_reward)
             self.total_reward += reward
             self.count += 1
 
         # Learn, if at end of episode
         if done:
-            self.Q[last_state][last_action] = update_Q(self.Q[last_state][last_action], 0, last_reward)
+            self.Q[last_state][last_action] = self.update_Q(self.Q[last_state][last_action], 0, last_reward)
             self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
 
         self.last_state = state
         self.last_action = action
-        self.last_reward = reward
+        self.last_reward = rewardzzz
 
         # Return complete action vector
         complete_action = action - 25
