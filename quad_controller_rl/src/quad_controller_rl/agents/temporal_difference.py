@@ -12,7 +12,6 @@ class TD(BaseAgent):
         # Task (environment) information
         self.task = task  # should contain observation_space and action_space
 
-        self.state_space = 15
         self.action_space = 5
 
         self.Q = defaultdict(lambda: np.zeros(self.action_space))
@@ -76,7 +75,7 @@ class TD(BaseAgent):
 
     def act(self, state):
         # Choose action based on given state and policy
-        epsilon = int(self.episode_num / 10.0) + 1
+        epsilon = int(self.episode_num / 50.0) + 1
         policy_s = self.epsilon_greedy_probs(self.Q[state], epsilon)
         action = np.random.choice(np.arange(self.action_space), p=policy_s)
         return action

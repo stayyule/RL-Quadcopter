@@ -47,22 +47,18 @@ class Hover_TD(BaseTask):
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
 
-        scaled_x = pose.position.x / self.scale * 5.0
-        scaled_y = pose.position.y / self.scale * 5.0
-        scaled_z = pose.position.z / self.scale * 5.0
+        del_x = self.target_x - pose.position.x
+        del_y = self.target_y - pose.position.y
+        del_z = self.target_z - pose.position.z
 
-        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
-        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
-        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
-
-        state = np.around(np.array([scaled_x, scaled_y, scaled_z]), decimals=0)
+        state = np.around(np.array([pose.position.x, pose.position.y, pose.position.z]), decimals=0)
 
         # Compute reward / penalty and check if this episode is complete
         done = False
 
         distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
-        reward = 5.0 - distance
+        reward = 10.0 - distance
         
 
         if timestamp > self.max_duration:  # agent has run out of time
