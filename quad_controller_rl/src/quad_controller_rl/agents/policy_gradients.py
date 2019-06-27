@@ -201,6 +201,9 @@ class Actor:
         self.action_size = action_size
 
         # Initialize any other variables here
+        self.hidden_layer1 = 300
+        self.hidden_layer2 = 600
+        self.learning_rate = 0.001
 
         self.build_model()
 
@@ -210,9 +213,8 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        net = layers.Dense(units=32, activation='relu')(states)
-        net = layers.Dense(units=64, activation='relu')(net)
-        net = layers.Dense(units=32, activation='relu')(net)
+        net = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
+        net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
@@ -237,7 +239,7 @@ class Actor:
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.0001)
+        optimizer = optimizers.Adam(lr=self.learning_rate)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss, constraints=[])
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
@@ -260,7 +262,9 @@ class Critic:
         self.action_size = action_size
 
         # Initialize any other variables here
-
+        self.hidden_layer1 = 300
+        self.hidden_layer2 = 600
+        self.learning_rate = 0.002
         self.build_model()
 
     def build_model(self):
@@ -270,12 +274,12 @@ class Critic:
         actions = layers.Input(shape=(self.action_size,), name='actions')
 
         # Add hidden layer(s) for state pathway
-        net_states = layers.Dense(units=32, activation='relu')(states)
-        net_states = layers.Dense(units=64, activation='relu')(net_states)
+        net_states = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
+        net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=32, activation='relu')(actions)
-        net_actions = layers.Dense(units=64, activation='relu')(net_actions)
+        net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
+        net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
@@ -292,7 +296,7 @@ class Critic:
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
 
         # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam(lr=0.002)
+        optimizer = optimizers.Adam(lr=self.learning_rate)
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
