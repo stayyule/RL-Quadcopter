@@ -41,7 +41,7 @@ class TD(BaseAgent):
         # Transform state vector
         state = state.flatten()  # convert to row vector
         #print('state:', state)
-        state = state[2]
+
 
         if self.count < self.step_count and self.last_action is not None:
             action = self.last_action
