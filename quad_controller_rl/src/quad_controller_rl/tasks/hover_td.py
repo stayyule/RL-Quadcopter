@@ -52,7 +52,7 @@ class Hover_TD(BaseTask):
         del_z = self.target_z - pose.position.z
 
         state = np.around(np.array(
-            [pose.position.x, pose.position.y, pose.position.z
+            [pose.position.x, pose.position.y, pose.position.z,
              linear_acceleration.x, linear_acceleration.y, linear_acceleration.z]), decimals=0)
 
         # Compute reward / penalty and check if this episode is complete
