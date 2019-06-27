@@ -50,6 +50,7 @@ class TD(BaseAgent):
         else:
             action = self.act(state)
             self.count = 0
+            print(self.Q)
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -88,6 +89,8 @@ class TD(BaseAgent):
         epsilon = 1.0 / i_episode
         policy_s = np.ones(self.action_space) * epsilon / self.action_space
         policy_s[np.argmax(Q_s)] = 1 - epsilon + (epsilon / self.action_space)
+        print('qs:', Q_s)
+        print('arg max:', np.argmax(Q_s))
         return policy_s
 
     def write_stats(self, stats):
