@@ -59,7 +59,7 @@ class TD(BaseAgent):
 
         self.last_state = state
         self.last_action = action
-        self.last_reward = rewardzzz
+        self.last_reward = reward
 
         # Return complete action vector
         complete_action = action - 25
