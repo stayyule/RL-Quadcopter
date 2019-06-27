@@ -49,7 +49,8 @@ class TD(BaseAgent):
         else:
             action = self.act(state)
             self.count = 0
-            print(self.Q)
+            for h in self.Q:
+                print('height:', h, 'arg max:', np.argmax(self.Q[h]))
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -58,7 +59,6 @@ class TD(BaseAgent):
             
         # Learn, if at end of episode
         if done:
-            self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], 0, self.last_reward)
             self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
@@ -75,7 +75,7 @@ class TD(BaseAgent):
 
     def act(self, state):
         # Choose action based on given state and policy
-        epsilon = int(self.episode_num / 50.0) + 1
+        epsilon = int(self.episode_num / 20.0) + 1
         policy_s = self.epsilon_greedy_probs(self.Q[state], epsilon)
         action = np.random.choice(np.arange(self.action_space), p=policy_s)
         return action
@@ -89,8 +89,8 @@ class TD(BaseAgent):
         epsilon = 1.0 / i_episode
         policy_s = np.ones(self.action_space) * epsilon / self.action_space
         policy_s[np.argmax(Q_s)] = 1 - epsilon + (epsilon / self.action_space)
-        print('qs:', Q_s)
-        print('arg max:', np.argmax(Q_s))
+        #print('qs:', Q_s)
+        #print('arg max:', np.argmax(Q_s))
         return policy_s
 
     def write_stats(self, stats):
