@@ -38,21 +38,24 @@ class TD(BaseAgent):
         self.count = 0
 
     def step(self, state, reward, done):
-        
+            
         # Transform state vector
         state = state.flatten()  # convert to row vector
         #print('state:', state)
         state = state[2]
 
-        # Choose an action
-        action = self.act(state)
+        if self.count < self.step_count and self.last_action is not None:
+            action = self.last_action
+            self.count += 1
+        else:
+            action = self.act(state)
+            self.count = 0
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
             self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], self.Q[state][action], self.last_reward)
             self.total_reward += reward
-            self.count += 1
-
+            
         # Learn, if at end of episode
         if done:
             self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], 0, self.last_reward)
