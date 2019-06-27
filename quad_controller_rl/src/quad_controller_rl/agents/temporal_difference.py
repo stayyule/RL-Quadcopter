@@ -70,7 +70,7 @@ class TD(BaseAgent):
 
     def act(self, state):
         # Choose action based on given state and policy
-        policy_s = epsilon_greedy_probs(self.Q[state], self.episode_num)
+        policy_s = self.epsilon_greedy_probs(self.Q[state], self.episode_num)
         action = np.random.choice(np.arrange(self.action_space), p=policy_s)
         return action
 
