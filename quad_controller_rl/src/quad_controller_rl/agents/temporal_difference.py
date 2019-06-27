@@ -19,7 +19,7 @@ class TD(BaseAgent):
         # Episode variables
         self.reset_episode_vars()
         self.episode_num = 1
-        self.step_count = 10
+        self.step_count = 20
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -52,7 +52,7 @@ class TD(BaseAgent):
             action = self.act(state)
             self.count = 0
             for h in self.Q:
-                print('height:', h, 'arg max:', np.argmax(self.Q[h]))
+                print('state:', h, 'arg max:', np.argmax(self.Q[h]))
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
