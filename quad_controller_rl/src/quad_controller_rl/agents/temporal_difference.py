@@ -20,6 +20,7 @@ class TD(BaseAgent):
         # Episode variables
         self.reset_episode_vars()
         self.episode_num = 1
+        self.step_count = 5
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -37,7 +38,7 @@ class TD(BaseAgent):
         self.count = 0
 
     def step(self, state, reward, done):
-
+        
         # Transform state vector
         state = state.flatten()  # convert to row vector
         #print('state:', state)
@@ -65,7 +66,7 @@ class TD(BaseAgent):
 
         # Return complete action vector
         complete_action = (action + 1) * 5.0
-        print('action:', complete_action)
+        print('action:', action, '-', complete_action)
         return np.array([[0, 0, complete_action, 0, 0, 0]])
 
 
