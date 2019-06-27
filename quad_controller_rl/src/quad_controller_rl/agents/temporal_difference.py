@@ -51,7 +51,7 @@ class TD(BaseAgent):
 
         # Learn, if at end of episode
         if done:
-            update_Q(self.Q[last_state][last_action], 0, last_reward)
+            self.Q[last_state][last_action] = update_Q(self.Q[last_state][last_action], 0, last_reward)
             self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
@@ -61,7 +61,7 @@ class TD(BaseAgent):
         self.last_reward = reward
 
         # Return complete action vector
-        complete_action = action
+        complete_action = action - 25
         #print('action', action)
         complete_action[0][-3:] = np.zeros(3) # linear force only
         complete_action[0][:2] = np.zeros(2) # z only
