@@ -1,5 +1,5 @@
 from collections import defaultdict, deque, namedtuple
-import sys
+import sys, os
 import numpy as np
 from quad_controller_rl import util
 from quad_controller_rl.agents.base_agent import BaseAgent
