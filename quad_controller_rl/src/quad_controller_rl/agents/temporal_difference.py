@@ -2,6 +2,7 @@ from collections import defaultdict, deque, namedtuple
 import sys
 import numpy as np
 from quad_controller_rl import util
+from quad_controller_rl.agents.base_agent import BaseAgent
 
 class TD(BaseAgent):
     """Sample agent that searches for optimal policy randomly."""
