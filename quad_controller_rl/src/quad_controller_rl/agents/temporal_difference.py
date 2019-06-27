@@ -43,6 +43,7 @@ class TD(BaseAgent):
 
         # Choose an action
         action = self.act(state)
+        print('action:', action)
         
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -63,10 +64,7 @@ class TD(BaseAgent):
 
         # Return complete action vector
         complete_action = action - 25
-        #print('action', action)
-        complete_action[0][-3:] = np.zeros(3) # linear force only
-        complete_action[0][:2] = np.zeros(2) # z only
-        return complete_action
+        return np.array([[0, 0, complete_action, 0, 0, 0]])
 
 
     def act(self, state):
