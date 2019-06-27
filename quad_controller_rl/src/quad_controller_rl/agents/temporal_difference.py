@@ -82,7 +82,7 @@ class TD(BaseAgent):
         action = np.random.choice(np.arange(self.action_space), p=policy_s)
         return action
 
-    def update_Q(self, Qsa, Qsa_next, reward, alpha = 0.001, gamma = 0.99):
+    def update_Q(self, Qsa, Qsa_next, reward, alpha = 0.0001, gamma = 1):
         """ updates the action-value function estimate using the most recent time step """
         return Qsa + (alpha * (reward + (gamma * Qsa_next) - Qsa))
 
