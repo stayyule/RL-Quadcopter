@@ -203,7 +203,7 @@ class Actor:
         # Initialize any other variables here
         self.hidden_layer1 = 300
         self.hidden_layer2 = 600
-        self.learning_rate = 0.001
+        self.learning_rate = 0.0001
 
         self.build_model()
 
@@ -264,7 +264,7 @@ class Critic:
         # Initialize any other variables here
         self.hidden_layer1 = 300
         self.hidden_layer2 = 600
-        self.learning_rate = 0.002
+        self.learning_rate = 0.001
         self.build_model()
 
     def build_model(self):
