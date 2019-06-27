@@ -19,7 +19,7 @@ class TD(BaseAgent):
         # Episode variables
         self.reset_episode_vars()
         self.episode_num = 1
-        self.step_count = 20
+        self.step_count = 10
 
         # Save episode stats
         self.stats_filename = os.path.join(
