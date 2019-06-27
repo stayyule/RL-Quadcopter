@@ -14,7 +14,7 @@ class TD(BaseAgent):
         self.state_space = 15
         self.action_space = 50
 
-        self.Q = defaultdict(lambda: np.zeros(slef.action_space))
+        self.Q = defaultdict(lambda: np.zeros(self.action_space))
 
         # Episode variables
         self.reset_episode_vars()
