@@ -51,8 +51,8 @@ class TD(BaseAgent):
         else:
             action = self.act(state)
             self.count = 0
-            # for h in self.Q:
-            #     print('state:', h, 'arg max:', np.argmax(self.Q[h]))
+            for h in self.Q:
+                print('state:', h, 'arg max:', np.argmax(self.Q[h]))
 
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:

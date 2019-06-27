@@ -32,7 +32,7 @@ class Hover_TD(BaseTask):
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
         self.scale = 15.0
-        self.last_action = None
+        self.last_action = 0.0
 
     def reset(self):
 
