@@ -47,13 +47,13 @@ class TD(BaseAgent):
         
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
-            self.Q[last_state][last_action] = self.update_Q(self.Q[last_state][last_action], self.Q[state][action], last_reward)
+            self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], self.Q[state][action], self.last_reward)
             self.total_reward += reward
             self.count += 1
 
         # Learn, if at end of episode
         if done:
-            self.Q[last_state][last_action] = self.update_Q(self.Q[last_state][last_action], 0, last_reward)
+            self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], 0, self.last_reward)
             self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
