@@ -37,6 +37,7 @@ class TD(BaseAgent):
         self.count = 0
 
     def step(self, state, reward, done):
+
         # Transform state vector
         state = state.flatten()  # convert to row vector
         #print('state:', state)
@@ -44,8 +45,7 @@ class TD(BaseAgent):
 
         # Choose an action
         action = self.act(state)
- 
-        
+
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
             self.Q[self.last_state][self.last_action] = self.update_Q(self.Q[self.last_state][self.last_action], self.Q[state][action], self.last_reward)
@@ -64,7 +64,7 @@ class TD(BaseAgent):
         self.last_reward = reward
 
         # Return complete action vector
-        complete_action = action * 5.0
+        complete_action = (action + 1) * 5.0
         print('action:', complete_action)
         return np.array([[0, 0, complete_action, 0, 0, 0]])
 
