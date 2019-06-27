@@ -1,6 +1,7 @@
 from collections import defaultdict
 import sys, os
 import numpy as np
+import pandas as pd
 from quad_controller_rl import util
 from quad_controller_rl.agents.base_agent import BaseAgent
 
@@ -43,7 +44,7 @@ class TD(BaseAgent):
 
         # Choose an action
         action = self.act(state)
-        print('action:', action)
+ 
         
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
@@ -64,6 +65,7 @@ class TD(BaseAgent):
 
         # Return complete action vector
         complete_action = action - 25
+        print('action:', complete_action)
         return np.array([[0, 0, complete_action, 0, 0, 0]])
 
 
