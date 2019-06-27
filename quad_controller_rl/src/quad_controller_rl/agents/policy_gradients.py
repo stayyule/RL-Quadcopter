@@ -135,7 +135,7 @@ class DDPG(BaseAgent):
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
         final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
-        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val, decimals=2), "action:", final_action)
+        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", final_action)
 
         return final_action
 
@@ -350,9 +350,9 @@ class ReplayBuffer:
     def sample(self, batch_size=64):
 
         """Randomly sample a batch of experiences from memory."""
-        #return random.sample(self.memory, k=batch_size)
-        self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
-        return self.memory[:batch_size]
+        return random.sample(self.memory, k=batch_size)
+        # self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
+        # return self.memory[:batch_size]
 
     def __len__(self):
         """Return the current size of internal memory."""
