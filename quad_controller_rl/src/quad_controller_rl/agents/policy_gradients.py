@@ -26,7 +26,7 @@ class DDPG(BaseAgent):
 
         if isinstance(self.task, Takeoff):
             self.state_size = 7
-        if isinstance(self.task, Hover):
+        else:
             self.state_size = 9
 
         self.action_size = 1
