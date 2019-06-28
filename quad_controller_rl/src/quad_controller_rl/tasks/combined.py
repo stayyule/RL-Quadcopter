@@ -123,7 +123,7 @@ class Combined(BaseTask):
             if timestamp < self.buffer_duration:
                 self.target_z = 5.0
             else:
-                self.target_z = 0.1
+                self.target_z = 1
 
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
