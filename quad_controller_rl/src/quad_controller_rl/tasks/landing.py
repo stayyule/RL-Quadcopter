@@ -5,7 +5,7 @@ from gym import spaces
 from geometry_msgs.msg import Vector3, Point, Quaternion, Pose, Twist, Wrench
 from quad_controller_rl.tasks.base_task import BaseTask
 
-class Hover(BaseTask):
+class Landing(BaseTask):
     """Simple task where the goal is to lift off the ground and reach a target height."""
 
     def __init__(self):
@@ -25,11 +25,12 @@ class Hover(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 8.0  # secs
+        self.max_duration = 5.0  # secs
+        self.buffer_duration = 2.5
 
         self.target_x = 0.0
         self.target_y = 0.0
-        self.target_z = 10.0  # target height (z position) to reach for successful takeoff
+        self.target_z = 5.0
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -114,6 +115,10 @@ class Hover(BaseTask):
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
             done = True
+        
+        if timestamp < self.buffer_duration:
+            
+            self.target_z = 0.1
 
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
