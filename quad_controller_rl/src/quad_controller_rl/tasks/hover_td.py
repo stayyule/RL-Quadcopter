@@ -32,7 +32,6 @@ class Hover_TD(BaseTask):
         self.target_z = 10.0  # target height (z position) to reach for successful takeoff
 
         self.scale = 15.0
-        self.last_action = 0.0
 
     def reset(self):
 
@@ -53,7 +52,8 @@ class Hover_TD(BaseTask):
         del_z = self.target_z - pose.position.z
 
         state = np.floor(np.array(
-            [pose.position.x, pose.position.y, pose.position.z, self.last_action]))
+            [pose.position.x, pose.position.y, pose.position.z,
+             linear_acceleration.x, linear_acceleration.y, linear_acceleration.z]))
 
         # Compute reward / penalty and check if this episode is complete
         done = False
@@ -76,7 +76,6 @@ class Hover_TD(BaseTask):
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
-            self.last_action = action
             return Wrench(
                     force=Vector3(action[0], action[1], action[2]),
                     torque=Vector3(action[3], action[4], action[5])
