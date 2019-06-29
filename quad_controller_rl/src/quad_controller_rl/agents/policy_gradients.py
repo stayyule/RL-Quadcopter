@@ -1,7 +1,5 @@
 import numpy as np
 from quad_controller_rl.agents.base_agent import BaseAgent
-from quad_controller_rl.tasks.takeoff import Takeoff
-from quad_controller_rl.tasks.hover_ddpg import Hover
 
 from keras import layers, models, optimizers
 from keras import backend as K
@@ -284,7 +282,7 @@ class Critic:
         net = layers.Concatenate(axis=-1)([net_states, actions])
         net = layers.Activation('relu')(net)
         net = layers.Dense(units=hidden_layer2, activation='relu')(net)
-        
+
         # Add more layers to the combined network if needed
 
 
