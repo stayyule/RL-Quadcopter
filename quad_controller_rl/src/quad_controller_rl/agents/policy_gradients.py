@@ -111,7 +111,10 @@ class DDPG(BaseAgent):
         complete_action = np.zeros(6)
         complete_action[2] = np.array(action).reshape(1)
         #print('step action:', complete_action.reshape(1,-1))
-        return complete_action * 25
+        ## tanh
+        #return complete_action * 25
+        # sigmoid
+        return complete_action * 50 - 25
 
     def act(self, states):
         """Returns actions [-1,1] for given state(s) as per current policy."""
@@ -212,7 +215,7 @@ class Actor:
 
         # Add final output layer with sigmoid activation
         # -----kernel
-        actions = layers.Dense(units=self.action_size, activation='tanh',
+        actions = layers.Dense(units=self.action_size, activation='sigmoid',
         name='raw_actions',
         kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
 
