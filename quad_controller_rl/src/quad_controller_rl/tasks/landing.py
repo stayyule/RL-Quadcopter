@@ -98,7 +98,7 @@ class Landing(BaseTask):
         reward_beta = 0.05
         distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
-        distance_reward = (5.0 - distance) * reward_alpha
+        distance_reward = - distance * reward_alpha
 
 
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
