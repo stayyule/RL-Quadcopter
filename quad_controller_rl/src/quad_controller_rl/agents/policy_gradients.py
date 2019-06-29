@@ -306,6 +306,7 @@ class Critic:
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
         action_gradients = K.gradients(Q_values, actions)
+        print('action gradients:', action_gradients)
 
         # Define an additional function to fetch action gradients (to be used by actor model)
         self.get_action_gradients = K.function(
