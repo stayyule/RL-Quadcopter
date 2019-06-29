@@ -66,6 +66,7 @@ class Combined(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
+        target_z = self.target_z
         if timestamp > self.landing_start and self.hovered:
             target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
 
