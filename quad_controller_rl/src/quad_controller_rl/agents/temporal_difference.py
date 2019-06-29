@@ -12,7 +12,7 @@ class TD(BaseAgent):
         # Task (environment) information
         self.task = task  # should contain observation_space and action_space
 
-        self.action_space = 5
+        self.action_space = 3
 
         self.Q = defaultdict(lambda: np.zeros(self.action_space))
 
@@ -70,7 +70,7 @@ class TD(BaseAgent):
         self.last_reward = reward
 
         # Return complete action vector
-        complete_action = (action + 1) * 5.0
+        complete_action = (action + 3) * 5.0
         #print('action:', action, '-', complete_action)
         return np.array([[0, 0, complete_action, 0, 0, 0]])
 

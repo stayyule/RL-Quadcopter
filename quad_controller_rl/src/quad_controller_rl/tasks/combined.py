@@ -1,5 +1,4 @@
 """Takeoff task."""
-from collections import deque
 
 import numpy as np
 from gym import spaces
@@ -10,14 +9,13 @@ class Combined(BaseTask):
     """Simple task where the goal is to lift off the ground and reach a target height."""
 
     def __init__(self):
-        # State space: <position_x, .._y, .._z, orientation_x, .._y, .._z, .._w>
         cube_size = 300.0  # env is cube_size x cube_size x cube_size
         self.observation_space = spaces.Box(
             np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
-            np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))
+            np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))        
+            
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
-        self.observation_space_range = self.observation_space.high - self.observation_space.low
-        
+
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
         max_force = 25.0
         max_torque = 25.0
@@ -25,77 +23,112 @@ class Combined(BaseTask):
             np.array([-max_force, -max_force, -max_force, -max_torque, -max_torque, -max_torque]),
             np.array([ max_force,  max_force,  max_force,  max_torque,  max_torque,  max_torque]))
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
-        self.action_space_range = self.action_space.high - self.action_space.low
-        
+
         # Task-specific parameters
         self.max_duration = 17.0  # secs
-        self.count = 0
-        self.action = None
-        self.last_time = 0.0
-        self.start = np.array([0.0,0.0,0.0])
-        self.target = np.array([0.0,0.0,10.0])
-        self.initial_target_z = self.target[2]
-        self.last_pos = np.array([0.0,0.0,0.0])
+        self.landing_duration = 5.0
+        self.landing_start = 9.0
         self.hovered = False
-        self.landing_time = 5.0
-        self.landing_start_time = 9.0
+
+        self.target_x = 0.0
+        self.target_y = 0.0
+        self.target_z = 10.0
+
+        self.last_x = 0.0
+        self.last_y = 0.0
+        self.last_z = 0.0
+
+        self.linear_vel = 0.0
+        self.scale = 15.0
 
     def reset(self):
-        self.count = 0
-        self.action = None
-        self.last_time = 0.0
-        rand_z = np.clip(np.random.normal(0.5, 0.1),0.2,20.)
-        self.start[2] = rand_z
-        self.target = np.array([0.0,0.0,10.0])
-        self.initial_target_z = self.target[2]
-        self.last_pos = self.start
-        self.hovered = False
+        self.last_x = 0.0
+        self.last_y = 0.0
+        self.last_z = 0.0
+        self.linear_vel = 0.0
+        # Nothing to reset; just return initial condition
         return Pose(
-                position=Point(0.0, 0.0,self.start[2] ), 
+                position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
                 orientation=Quaternion(0.0, 0.0, 0.0, 0.0),
             ), Twist(
                 linear=Vector3(0.0, 0.0, 0.0),
                 angular=Vector3(0.0, 0.0, 0.0)
             )
-    
-    def state_rescale(self,state):
-        """rescaling to (-5.,5.)""" 
-        mid = (self.observation_space.high + self.observation_space.low)*0.5
-        rescaled = 5. * ((state - mid[:3])/(self.observation_space_range[:3]*0.5))
-        return rescaled
-    
+
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
-        self.count += 1
-        pos = np.array([pose.position.x, pose.position.y, pose.position.z])
-        distance = np.linalg.norm(self.target-pos)
-        rescaled_pos = self.state_rescale(pos)
-        rescaled_tar = self.state_rescale(self.target)
-        pos_target_vec = rescaled_tar - rescaled_pos
-        delta_pos = (pos-self.last_pos)
-        self.last_pos = pos
-        state = np.concatenate((rescaled_pos,delta_pos*10.,pos_target_vec*5.0),axis=-1)
-        #state = state[None,:]
-        accel = np.array([linear_acceleration.x, linear_acceleration.y, linear_acceleration.z])
-        sum_accel = np.linalg.norm(accel)
+        # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
+
+        scaled_x = pose.position.x / self.scale * 5.0
+        scaled_y = pose.position.y / self.scale * 5.0
+        scaled_z = pose.position.z / self.scale * 5.0
+
+        vel_x = pose.position.x - self.last_x
+        vel_y = pose.position.y - self.last_y
+        vel_z = pose.position.z - self.last_z
+
+
+        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
+        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
+        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+
+        state = np.around(np.array([
+                scaled_x, scaled_y, scaled_z,
+                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+                del_z ]), decimals=2)
+
+        # state = np.around(np.array([
+        #         pose.position.x, pose.position.y, pose.position.z,
+        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+        #         self.target_x - pose.position.x, 
+        #         self.target_y - pose.position.y, 
+        #         self.target_z - pose.position.z ]), decimals=2)
+
+        self.last_x = pose.position.x
+        self.last_y = pose.position.y
+        self.last_z = pose.position.z
+
+        self.linear_vel += linear_acceleration.z
+        # Compute reward / penalty and check if this episode is complete
         done = False
-        reward = (5.-distance)*0.3 - sum_accel*0.05
         
-        if distance < 0.1 and self.target[2]==10.0:
+        reward_alpha = 0.3
+        reward_beta = 0.05
+        distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
+
+        distance_reward =  - distance * reward_alpha
+
+#        if pose.position.z < 1:
+#            accelerate_reward = 0
+#        else:
+#            if pose.position.z < self.target_z:
+#                accelerate_reward = - linear_acceleration.z * reward_beta
+#            else:
+#                accelerate_reward = linear_acceleration.z * reward_beta
+        accelerate_reward = abs(linear_acceleration.z) * reward_beta
+
+        reward = distance_reward - accelerate_reward
+
+        if timestamp > self.landing_start and self.hovered:
+           self.target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+        if del_z < 0.1 and self.target_z == 10.0:
             self.hovered = True
-        if timestamp>self.landing_start_time and self.hovered:
-            target_z = max((self.initial_target_z/self.landing_time)*(
-                                    (self.landing_start_time+self.landing_time)-timestamp),0.0)
-            self.target = np.array([0.0,0.0,target_z])
-            
-        print('re={:.3} pt={:.3} tar={:.3}'.format(reward ,pos_target_vec[2],self.target[2]),end='\r')
-            
-        if (timestamp > self.max_duration):
-            done = True
-            
-        action = self.agent.step(state, reward, done)
-        #print('action={:.3} reward={:.3}'.format(self.action[2],reward),end='\r')
         
-        #action = self.action * self.action_space_range[2] * 0.5
+        print('==========')
+        print('height:', pose.position.z)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
+        print('target:', self.target_z)
+
+        if timestamp > self.max_duration:  # agent has run out of time
+            #reward -= 10.0  # extra penalty
+            done = True
+        
+        # Take one RL step, passing in current state and reward, and obtain action
+        # Note: The reward passed in here is the result of past action(s)
+        action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
+        #print("next action:", action)
+        # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
             return Wrench(
@@ -103,4 +136,5 @@ class Combined(BaseTask):
                     torque=Vector3(action[3], action[4], action[5])
                 ), done
         else:
+
             return Wrench(), done
