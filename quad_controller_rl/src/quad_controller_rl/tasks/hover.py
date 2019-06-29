@@ -26,10 +26,11 @@ class Hover(BaseTask):
 
         # Task-specific parameters
         self.max_duration = 8.0  # secs
+        self.takeoff_duration = 5.0
 
         self.target_x = 0.0
         self.target_y = 0.0
-        self.target_z = 10.0  # target height (z position) to reach for successful takeoff
+        self.target_z = 0.0  # target height (z position) to reach for successful takeoff
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -37,6 +38,8 @@ class Hover(BaseTask):
 
         self.linear_vel = 0.0
         self.scale = 15.0
+
+        self.final_target = 10.0
 
     def reset(self):
         self.last_x = 0.0
@@ -109,6 +112,11 @@ class Hover(BaseTask):
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
+        
+        target_val = self.final_target / self.takeoff_duration * timestamp
+
+        self.target_z = min (np.around(target_val), 10.0)
+        print('target:', self.target_z)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
