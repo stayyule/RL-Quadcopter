@@ -159,7 +159,7 @@ class DDPG(BaseAgent):
         #print(states, actions, Q_targets)
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
-        #print('action_gradients:', action_gradients)
+        print('action_gradients:', action_gradients)
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
 
         # Soft-update target model
@@ -306,7 +306,6 @@ class Critic:
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
         action_gradients = K.gradients(Q_values, actions)
-        print('action gradients:', action_gradients)
 
         # Define an additional function to fetch action gradients (to be used by actor model)
         self.get_action_gradients = K.function(
