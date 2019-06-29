@@ -281,7 +281,7 @@ class Critic:
         # Concatenate state and action values
         net = layers.Concatenate(axis=-1)([net_states, actions])
         net = layers.Activation('relu')(net)
-        net = layers.Dense(units=hidden_layer2, activation='relu')(net)
+        net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
 
         # Add more layers to the combined network if needed
 
