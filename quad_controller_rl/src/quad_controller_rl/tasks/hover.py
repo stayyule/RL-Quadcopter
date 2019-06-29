@@ -118,8 +118,8 @@ class Hover(BaseTask):
         print('target:', self.target_z)
 
         if self.target_z == 10.0:
-            print('extra reward:', del_z < 0.1, del_z)
-            if del_z < 0.1:
+            print('extra reward:', abs(del_z) < 0.1, del_z)
+            if abs(del_z) < 0.1:
                 reward += 1.0
             else:
                 if pose.position.z > 10.0:
