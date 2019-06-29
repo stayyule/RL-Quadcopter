@@ -113,7 +113,8 @@ class Landing(BaseTask):
         print('height:', pose.position.z)
         print('reward:', reward)
         print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)        print('target:', self.target_z)
+        print('accelerate:', accelerate_reward)        
+        print('target:', self.target_z)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
