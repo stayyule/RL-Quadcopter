@@ -122,7 +122,7 @@ class Hover(BaseTask):
             if del_z < 0.1:
                 reward += 1.0
             else:
-                if pose.position._z > 10.0:
+                if pose.position.z > 10.0:
                     reward -= 1.0
 
 
