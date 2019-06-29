@@ -1,12 +1,20 @@
 import numpy as np
-import os
-import pandas as pd
-
-from quad_controller_rl import util
 from quad_controller_rl.agents.base_agent import BaseAgent
 
 from keras import layers, models, optimizers
 from keras import backend as K
+
+import os
+import pandas as pd
+from quad_controller_rl import util
+
+import random
+
+from collections import namedtuple
+
+Experience = namedtuple("Experience",
+    field_names=["state", "action", "reward", "next_state", "done"])
+
 
 
 # Create DDPG Actor
