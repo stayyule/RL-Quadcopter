@@ -159,7 +159,7 @@ class DDPG(BaseAgent):
         #print(states, actions, Q_targets)
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
-        print('action_gradients:', action_gradients)
+        #print('action_gradients:', action_gradients)
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
 
         # Soft-update target model
@@ -233,7 +233,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
 
-        loss = K.mean(- action_gradients * (actions + 1))
+        loss = K.mean( action_gradients * (actions))
 
         # Incorporate any additional losses here (e.g. from regularizers)
 

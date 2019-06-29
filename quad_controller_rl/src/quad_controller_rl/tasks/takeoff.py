@@ -53,10 +53,14 @@ class Takeoff(BaseTask):
         elif timestamp > self.max_duration:  # agent has run out of time
             reward -= 10.0  # extra penalty
             done = True
-        #elif abs(pose.orientation.x) > 1 or abs(pose.orientation.y) > 1 :
-        #    reward -= 10.0
-        #    done = True
 
+        print('==========')
+        print('height:', pose.position.z)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)        
+        print('target:', self.target_z)
+        
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
