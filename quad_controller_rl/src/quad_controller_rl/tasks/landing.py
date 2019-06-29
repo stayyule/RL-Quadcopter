@@ -64,7 +64,7 @@ class Landing(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
         
-        target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+        target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration - timestamp), 0.0)
 
         del_x = (self.target_x - pose.position.x) / self.scale * 5.0
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
