@@ -65,10 +65,16 @@ class Combined(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
+        if timestamp > self.landing_start and self.hovered:
+            target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+
         del_x = (self.target_x - pose.position.x) / self.scale * 5.0
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
+        if del_z < 0.1 and target_z == 10.0:
+            self.hovered = True
+ 
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
@@ -117,14 +123,6 @@ class Combined(BaseTask):
             #reward -= 10.0  # extra penalty
             done = True
         
-        if timestamp < self.hover_duration:           
-            self.target_z = 10.0
-        else:
-            if timestamp < self.buffer_duration:
-                self.target_z = 5.0
-            else:
-                self.target_z = 1
-
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector

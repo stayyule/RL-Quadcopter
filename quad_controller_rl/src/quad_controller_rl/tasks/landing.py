@@ -25,12 +25,14 @@ class Landing(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 5.0  # secs
-        self.buffer_duration = 2.5
+        self.max_duration = 17.0  # secs
+        self.landing_duration = 5.0
+        self.landing_start = 9.0
+        self.hovered = False
 
         self.target_x = 0.0
         self.target_y = 0.0
-        self.target_z = 5.0
+        self.target_z = 10.0
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -63,11 +65,16 @@ class Landing(BaseTask):
         vel_x = pose.position.x - self.last_x
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
+        
+        target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
 
         del_x = (self.target_x - pose.position.x) / self.scale * 5.0
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
-        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+        del_z = (target_z - pose.position.z) / self.scale * 5.0
 
+        if del_z < 0.1 and target_z == 10.0:
+            self.hovered = True
+        
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
@@ -94,13 +101,7 @@ class Landing(BaseTask):
 
         distance_reward = (5.0 - distance) * reward_alpha
 
-#        if pose.position.z < 1:
-#            accelerate_reward = 0
-#        else:
-#            if pose.position.z < self.target_z:
-#                accelerate_reward = - linear_acceleration.z * reward_beta
-#            else:
-#                accelerate_reward = linear_acceleration.z * reward_beta
+
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
         reward = distance_reward - accelerate_reward
@@ -116,12 +117,6 @@ class Landing(BaseTask):
             #reward -= 10.0  # extra penalty
             done = True
         
-        if timestamp < self.buffer_duration:
-            
-            self.target_z = 5.0
-        else:
-            self.target_z = 10.0
-
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector

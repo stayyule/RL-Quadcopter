@@ -47,13 +47,13 @@ class DDPG(BaseAgent):
         self.noise = OUNoise(self.action_size)
 
         # Replay memory
-        self.buffer_size = 10000
-        self.batch_size = 64
+        self.buffer_size = 100000
+        self.batch_size = 128
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
-        self.tau = 0.001 # for soft update of target parameters
+        self.tau = 0.005 # for soft update of target parameters
 
         self.reset_episode_vars()
 
@@ -87,12 +87,12 @@ class DDPG(BaseAgent):
 
         # Choose an action
         action = self.act(state)
-
+        self.count += 1
+        
         # Save experience / reward
         if self.last_state is not None and self.last_action is not None:
             self.memory.add(self.last_state, self.last_action, reward, state, done)
             self.total_reward += reward
-            self.count += 1
 
         #...
         # Learn, if enough samples are available in memory
@@ -110,7 +110,6 @@ class DDPG(BaseAgent):
             self.episode_num += 1
             self.reset_episode_vars()
             #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
-
 
         self.last_state = state
         self.last_action = action
@@ -219,8 +218,10 @@ class Actor:
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Add final output layer with sigmoid activation
+        # -----kernel
         actions = layers.Dense(units=self.action_size, activation='tanh',
-        name='raw_actions')(net)
+        name='raw_actions',
+        kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
 
         # Scale [-1, 1] output for each action dimension to proper range
         #actions = layers.Lambda(lambda x: x * self.action_range / 2,
@@ -290,7 +291,8 @@ class Critic:
         # Add more layers to the combined network if needed
 
         # Add final output layer to prduce action values (Q values)
-        Q_values = layers.Dense(units=1, name='q_values')(net)
+        Q_values = layers.Dense(units=1, name='q_values',
+        kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
 
         # Create Keras model
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
