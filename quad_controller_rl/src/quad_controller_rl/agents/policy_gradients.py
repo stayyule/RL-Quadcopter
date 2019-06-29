@@ -144,7 +144,7 @@ class DDPG(BaseAgent):
         # Q_targets_next = critic_target(next_state, actor_target(next_state))
         actions_next = self.actor_target.model.predict_on_batch(next_states)
         Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
-        self.total_q += Q_targets_next
+        print('Q next:', Q_targets_next)
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
@@ -152,6 +152,7 @@ class DDPG(BaseAgent):
         #print(states, actions, Q_targets)
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
+        print('action_gradients:', action_gradients)
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
 
         # Soft-update target models
