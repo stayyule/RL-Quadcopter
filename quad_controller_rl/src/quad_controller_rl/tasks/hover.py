@@ -121,6 +121,9 @@ class Hover(BaseTask):
             print('extra reward:', del_z < 0.1)
             if del_z < 0.1:
                 reward += 1.0
+            else:
+                if pose.position._z > 10.0:
+                    reward -= 1.0
 
 
         if timestamp > self.max_duration:  # agent has run out of time
