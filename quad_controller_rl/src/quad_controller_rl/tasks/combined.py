@@ -110,7 +110,7 @@ class Combined(BaseTask):
 
         if timestamp > self.landing_start and self.hovered:
            self.target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
-        if del_z < 0.1 and target_z == 10.0:
+        if del_z < 0.1 and self.target_z == 10.0:
             self.hovered = True
         
         print('==========')
