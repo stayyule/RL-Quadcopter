@@ -22,7 +22,7 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        self.state_size = 7
+        self.state_size = 9
         self.action_size = 1
 
         # Actor (Policy) Model
