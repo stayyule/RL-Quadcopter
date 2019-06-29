@@ -105,16 +105,15 @@ class Landing(BaseTask):
 
         reward = distance_reward - accelerate_reward
         
+        target_val = (self.initial_target / self.landing_duration) * (self.landing_duration - timestamp)
+
+        self.target_z = max (np.around(target_val), 0.0)
+        
         print('==========')
         print('height:', pose.position.z)
         print('reward:', reward)
         print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)
-
-        target_val = (self.initial_target / self.landing_duration) * (self.landing_duration - timestamp)
-
-        self.target_z = max (np.around(target_val), 0.0)
-        print('target:', self.target_z)
+        print('accelerate:', accelerate_reward)        print('target:', self.target_z)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty

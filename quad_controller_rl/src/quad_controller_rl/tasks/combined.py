@@ -25,14 +25,14 @@ class Combined(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 15.0  # secs
+        self.max_duration = 17.0  # secs
         self.landing_duration = 5.0
         self.landing_start = 9.0
         self.hovered = False
 
         self.target_x = 0.0
         self.target_y = 0.0
-        self.target_z = 5.0
+        self.target_z = 10.0
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -66,17 +66,11 @@ class Combined(BaseTask):
         vel_y = pose.position.y - self.last_y
         vel_z = pose.position.z - self.last_z
 
-        target_z = self.target_z
-        if timestamp > self.landing_start and self.hovered:
-            target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
 
         del_x = (self.target_x - pose.position.x) / self.scale * 5.0
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
-        if del_z < 0.1 and target_z == 10.0:
-            self.hovered = True
- 
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
@@ -113,13 +107,18 @@ class Combined(BaseTask):
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
         reward = distance_reward - accelerate_reward
+
+        if timestamp > self.landing_start and self.hovered:
+           self.target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+        if del_z < 0.1 and target_z == 10.0:
+            self.hovered = True
         
         print('==========')
         print('height:', pose.position.z)
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
-
+        print('target:', self.target_z)
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
