@@ -105,12 +105,12 @@ class Landing(BaseTask):
 
         reward = distance_reward - accelerate_reward
         
-        #print('==========')
-        #print('height:', pose.position.z)
-        #print('state:', state)
-        #print('reward:', reward)
-        #print('distance:', distance_reward)
-        #print('accelerate:', accelerate_reward)
+        print('==========')
+        print('height:', pose.position.z)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
+
         target_val = (self.initial_target / self.landing_duration) * (self.landing_duration - timestamp)
 
         self.target_z = max (np.around(target_val), 0.0)
