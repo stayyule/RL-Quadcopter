@@ -24,11 +24,7 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        if isinstance(self.task, Takeoff):
-            self.state_size = 7
-        else:
-            self.state_size = 9
-
+        self.state_size = 7
         self.action_size = 1
 
         # Actor (Policy) Model
@@ -232,8 +228,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))       
 
-        #loss = K.mean(-action_gradients * actions)
-        loss = K.mean(-action_gradients)
+        loss = K.mean(-action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 

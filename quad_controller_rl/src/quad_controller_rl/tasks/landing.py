@@ -84,7 +84,7 @@ class Landing(BaseTask):
         state = np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-                del_x, del_y, del_z ])
+                del_z ])
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y
