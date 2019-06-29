@@ -155,26 +155,25 @@ class DDPG(BaseAgent):
         #print('action_gradients:', action_gradients)
         self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
 
-        # Soft-update target models
-        #self.soft_update(self.critic_local.model, self.critic_target.model)
-        local_weights = np.array(self.critic_local.model.get_weights())
-        target_weights = np.array(self.critic_target.model.get_weights())
-
-        new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        self.critic_target.model.set_weights(new_weights)
-
-        #self.soft_update(self.actor_local.model, self.actor_target.model)
-        local_weights = np.array(self.actor_local.model.get_weights())
-        target_weights = np.array(self.actor_target.model.get_weights())
-
-        new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        self.actor_target.model.set_weights(new_weights)
+        # Soft-update target model
+        self.soft_update(self.critic_local.model, self.critic_target.model)
+        self.soft_update(self.actor_local.model, self.actor_target.model)
 
     def write_stats(self, stats, file_name):
         """Write single episode stats to CSV file."""
         df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
         df_stats.to_csv(file_name, mode='a', index=False,
             header=not os.path.isfile(file_name))  # write header first time only
+
+    def soft_update(self, local_model, target_model):
+        """Soft update model params"""
+        local_weights = np.array(local_model.get_weights())
+        target_weights = np.array(target_model.get_weights())
+
+        new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
+        target_model.set_weights(new_weights)
+
+
 
 
 class Actor:

@@ -97,7 +97,7 @@ class Combined(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 1
+        reward_alpha = 0.3
         reward_beta = 0.05
         distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
@@ -114,12 +114,12 @@ class Combined(BaseTask):
 
         reward = distance_reward - accelerate_reward
         
-        #print('==========')
-        #print('height:', pose.position.z)
-        #print('state:', state)
-        #print('reward:', reward)
-        #print('distance:', distance_reward)
-        #print('accelerate:', accelerate_reward)
+        print('==========')
+        print('height:', pose.position.z)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
+
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
