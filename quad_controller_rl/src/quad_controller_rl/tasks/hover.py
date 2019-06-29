@@ -77,8 +77,8 @@ class Hover(BaseTask):
 
         state = np.around(np.array([
                 pose.position.x, pose.position.y, pose.position.z,
-                linear_acceleration.x, linear_acceleration.y, linear_acceleration.z
-                self.target_z - pose.position.z ]), decimals=2)
+                linear_acceleration.x, linear_acceleration.y, linear_acceleration.z,
+                del_z ]), decimals=2)
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y
