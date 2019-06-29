@@ -25,10 +25,8 @@ class Landing(BaseTask):
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
-        self.max_duration = 17.0  # secs
+        self.max_duration = 7.0  # secs
         self.landing_duration = 5.0
-        self.landing_start = 9.0
-        self.hovered = False
 
         self.target_x = 0.0
         self.target_y = 0.0
@@ -72,9 +70,7 @@ class Landing(BaseTask):
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (target_z - pose.position.z) / self.scale * 5.0
 
-        if del_z < 0.1 and target_z == 10.0:
-            self.hovered = True
-        
+       
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,

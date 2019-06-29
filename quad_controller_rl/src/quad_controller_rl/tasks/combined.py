@@ -26,8 +26,9 @@ class Combined(BaseTask):
 
         # Task-specific parameters
         self.max_duration = 15.0  # secs
-        self.hover_duration = 8.0
-        self.buffer_duration = 12.0
+        self.landing_duration = 5.0
+        self.landing_start = 9.0
+        self.hovered = False
 
         self.target_x = 0.0
         self.target_y = 0.0
