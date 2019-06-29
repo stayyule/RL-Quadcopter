@@ -231,8 +231,7 @@ class Actor:
         self.model = models.Model(inputs=states, outputs=actions)
 
         # Define loss function using action value (Q value) gradients
-        action_gradients = layers.Input(shape=(self.action_size,))
-        
+        action_gradients = layers.Input(shape=(self.action_size,))       
         loss = K.mean(-action_gradients * actions)
 
         #loss = K.mean(action_gradients * actions)
@@ -276,11 +275,11 @@ class Critic:
 
         # Add hidden layer(s) for state pathway
         net_states = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
-        net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
+        #net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
 
         # Add hidden layer(s) for action pathway
         net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
-        net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
+        #net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
