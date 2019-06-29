@@ -219,7 +219,7 @@ class Actor:
 
         # Add final output layer with sigmoid activation
         # -----kernel
-        actions = layers.Dense(units=self.action_size, activation='sigmoid',
+        actions = layers.Dense(units=self.action_size, activation='tanh',
         name='raw_actions',
         kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
 
