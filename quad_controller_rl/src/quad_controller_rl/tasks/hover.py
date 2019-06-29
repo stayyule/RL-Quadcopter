@@ -118,8 +118,11 @@ class Hover(BaseTask):
         self.target_z = min (np.around(target_val), 10.0)
         print('target:', self.target_z)
 
+        if del_z < 0.1 and self.target_z == 10.0:
+            reward += 1.0
+
         if timestamp > self.max_duration:  # agent has run out of time
-            #reward -= 10.0  # extra penalty
+            reward -= 10.0  # extra penalty
             done = True
 
         # Take one RL step, passing in current state and reward, and obtain action

@@ -50,8 +50,9 @@ class Takeoff(BaseTask):
         if pose.position.z >= self.target_z:  # agent has crossed the target height
             reward += 10.0  # bonus reward
             done = True
-
-
+        elif timestamp > self.max_duration:  # agent has run out of time
+            reward -= 10.0  # extra penalty
+            done = True
         #elif abs(pose.orientation.x) > 1 or abs(pose.orientation.y) > 1 :
         #    reward -= 10.0
         #    done = True
