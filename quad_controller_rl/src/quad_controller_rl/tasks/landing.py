@@ -69,10 +69,10 @@ class Landing(BaseTask):
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
-        state = np.around(np.array([
-                scaled_x, scaled_y, scaled_z,
-                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-                del_x, del_y, del_z ]), decimals=2)
+        # state = np.around(np.array([
+        #         scaled_x, scaled_y, scaled_z,
+        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+        #         del_x, del_y, del_z ]), decimals=2)
 
         # state = np.around(np.array([
         #         pose.position.x, pose.position.y, pose.position.z,
@@ -80,6 +80,11 @@ class Landing(BaseTask):
         #         self.target_x - pose.position.x, 
         #         self.target_y - pose.position.y, 
         #         self.target_z - pose.position.z ]), decimals=2)
+
+        state = np.array([
+                scaled_x, scaled_y, scaled_z,
+                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+                del_x, del_y, del_z ])
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y
@@ -89,7 +94,7 @@ class Landing(BaseTask):
         # Compute reward / penalty and check if this episode is complete
         done = False
         
-        reward_alpha = 1
+        reward_alpha = 0.3
         reward_beta = 0.05
         distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
