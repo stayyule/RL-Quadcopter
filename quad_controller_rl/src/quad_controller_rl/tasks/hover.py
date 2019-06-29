@@ -109,11 +109,11 @@ class Hover(BaseTask):
         else:
             reward = distance_reward - abs(vel_z * 10)
         
-        print('==========')
-        print('height:', pose.position.z)
-        print('reward:', reward)
-        print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)
+        # print('==========')
+        # print('height:', pose.position.z)
+        # print('reward:', reward)
+        # print('distance:', distance_reward)
+        # print('accelerate:', accelerate_reward)
         
         # target_val = max(self.final_target / self.takeoff_duration * timestamp, 5)
 
