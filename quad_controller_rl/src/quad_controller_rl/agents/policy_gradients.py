@@ -130,9 +130,9 @@ class DDPG(BaseAgent):
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
         #tanh
-        #final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
+        final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
         #sigmoid
-        final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), 0, 1)
+        #final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), 0, 1)
         print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", np.around(final_action,decimals=2))
 
         return final_action
@@ -232,7 +232,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
 
-        loss = K.mean( action_gradients * (actions))
+        loss = K.mean(-action_gradients * (actions))
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
