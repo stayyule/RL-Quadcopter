@@ -59,7 +59,6 @@ class DDPG(BaseAgent):
 
         self.epsilon = 1
         self.episode_num = 1
-        self.count = 0
 
         # Save episode stats
         self.stats_filename = os.path.join(
@@ -134,7 +133,7 @@ class DDPG(BaseAgent):
         #else:
         #    return np.around(noise_epsilon * noise_val, decimals=2)
         final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
-        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", final_action)
+        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", np.around(final_action,decimals=2))
 
         return final_action
 
@@ -200,8 +199,8 @@ class Actor:
         self.action_size = action_size
 
         # Initialize any other variables here
-        self.hidden_layer1 = 300
-        self.hidden_layer2 = 600
+        self.hidden_layer1 = 64
+        self.hidden_layer2 = 64
         self.learning_rate = 0.0001
 
         self.build_model()
@@ -232,9 +231,8 @@ class Actor:
 
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))       
-        loss = K.mean(-action_gradients * actions)
 
-        #loss = K.mean(action_gradients * actions)
+        loss = K.mean(action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
@@ -262,8 +260,8 @@ class Critic:
         self.action_size = action_size
 
         # Initialize any other variables here
-        self.hidden_layer1 = 300
-        self.hidden_layer2 = 600
+        self.hidden_layer1 = 64
+        self.hidden_layer2 = 64
         self.learning_rate = 0.001
         self.build_model()
 
