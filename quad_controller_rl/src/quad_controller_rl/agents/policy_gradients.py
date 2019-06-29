@@ -272,16 +272,21 @@ class Critic:
         #net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
+        #net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
         #net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Combine state and action pathways
-        net = layers.Add()([net_states, net_actions])
+        # net = layers.Add()([net_states, net_actions])
+        # net = layers.Activation('relu')(net)
+        # Concatenate state and action values
+        net = layers.Concatenate(axis=-1)([net_states, actions])
         net = layers.Activation('relu')(net)
-
+        net = layers.Dense(units=hidden_layer2, activation='relu')(net)
+        
         # Add more layers to the combined network if needed
+
 
         # Add final output layer to prduce action values (Q values)
         Q_values = layers.Dense(units=1, name='q_values',
