@@ -4,7 +4,6 @@ import pandas as pd
 
 from quad_controller_rl import util
 from quad_controller_rl.agents.base_agent import BaseAgent
-from quad_controller_rl.agents.utils import ReplayBuffer, OUNoise
 
 from keras import layers, models, optimizers
 from keras import backend as K
@@ -243,3 +242,60 @@ class DDPG(BaseAgent):
         complete_action = np.zeros(self.task.action_space.shape)
         complete_action[2] = action
         return complete_action
+
+class OUNoise:
+    """Ornstein-Uhlenbeck process."""
+    #0.15 0.3
+    def __init__(self, size, mu=None, theta=0.15, sigma=0.02, dt=1e-2):
+        """Initialize parameters and noise process."""
+        self.size = size
+        self.mu = mu if mu is not None else np.zeros(self.size)
+        self.theta = theta
+        self.sigma = sigma
+        self.dt = dt
+        self.state = np.ones(self.size) * self.mu
+        self.reset()
+
+    def reset(self):
+        """Reset the internal state (= noise) to mean (mu)."""
+        self.state = np.ones(self.size) * self.mu
+
+    def sample(self):
+        """Update internal state and return it as a noise sample."""
+        x = self.state
+        dx = self.theta * (self.mu - x) * self.dt + self.sigma * np.sqrt(self.dt) * np.random.randn(len(x))
+        self.state = x + dx
+        return self.state
+
+class ReplayBuffer:
+    """Fixed-size circular buffer to store experience tuples."""
+
+    def __init__(self, size=1000):
+        """Initialize a ReplayBuffer object."""
+        self.size = size  # maximum size of buffer
+        self.memory = []  # internal memory (list)
+        self.idx = 0  # current index into circular buffer
+    
+    def add(self, state, action, reward, next_state, done):
+        """Add a new experience to memory."""
+        e = Experience(state, action, reward, next_state, done)
+        #print(e)
+        if len(self.memory) < self.size:
+            self.memory.append(e)
+        else:
+            self.memory[self.idx] = e
+            self.idx = (self.idx + 1) % self.size
+    
+    def sample(self, batch_size=64):
+
+        """Randomly sample a batch of experiences from memory."""
+        return random.sample(self.memory, k=batch_size)
+        # self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
+        # return self.memory[:batch_size]
+
+    def __len__(self):
+        """Return the current size of internal memory."""
+        return len(self.memory)
+
+    def get_reward(self, exp):
+        return exp[2]
