@@ -57,9 +57,9 @@ class RandomPolicySearch(BaseAgent):
         # Learn, if at end of episode
         if done:
             self.learn()
-            self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
+            self.reset_episode_vars()
 
         # Return complete action vector
         complete_action = action
