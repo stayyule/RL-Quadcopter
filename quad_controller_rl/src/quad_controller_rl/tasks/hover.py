@@ -36,7 +36,7 @@ class Hover(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
 
-        self.linear_vel = 0.0
+
         self.scale = 15.0
 
         self.final_target = 10.0
@@ -46,7 +46,7 @@ class Hover(BaseTask):
         self.last_x = 0.0
         self.last_y = 0.0
         self.last_z = 0.0
-        self.linear_vel = 0.0
+
         self.action = None
         self.last_time = 0.0
         # Nothing to reset; just return initial condition
@@ -70,9 +70,9 @@ class Hover(BaseTask):
         # vel_z = pose.position.z - self.last_z
         print('timestamp:', timestamp, 'last time:', self.last_time)
         if timestamp != self.last_time:
-            vel_x = (pose.position.x - self.last_x) / (timestamp - self.last_time)
-            vel_y = (pose.position.y - self.last_y) / (timestamp - self.last_time)
-            vel_z = (pose.position.z - self.last_z) / (timestamp - self.last_time)
+            vel_x = (pose.position.x - self.last_x) / (timestamp - self.last_time) / self.scale
+            vel_y = (pose.position.y - self.last_y) / (timestamp - self.last_time) / self.scale
+            vel_z = (pose.position.z - self.last_z) / (timestamp - self.last_time) / self.scale
         else:
             vel_x = vel_y = vel_z = 0.0
         
@@ -102,7 +102,6 @@ class Hover(BaseTask):
         self.last_z = pose.position.z
         self.last_time = timestamp
 
-        self.linear_vel += linear_acceleration.z
         # Compute reward / penalty and check if this episode is complete
         done = False
         
@@ -119,7 +118,7 @@ class Hover(BaseTask):
 #                accelerate_reward = - linear_acceleration.z * reward_beta
 #            else:
 #                accelerate_reward = linear_acceleration.z * reward_beta
-        accelerate_reward = abs(linear_acceleration.z) * reward_beta
+        accelerate_reward = abs(vel_z) * reward_beta
 
         #reward = distance_reward - accelerate_reward
         if pose.position.z <= 5.0:
@@ -131,7 +130,7 @@ class Hover(BaseTask):
         print('height:', pose.position.z)
         print('reward:', reward)
         print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)
+        # print('accelerate:', accelerate_reward)
         print('vel:', vel_z)
         
         # target_val = max(self.final_target / self.takeoff_duration * timestamp, 5)
