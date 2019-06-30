@@ -75,6 +75,7 @@ class DDPG(BaseAgent):
         self.total_reward = 0.0
         self.total_q = 0.0
         self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
 
     def step(self, state, reward, done):
 
