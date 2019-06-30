@@ -70,15 +70,15 @@ class Hover(BaseTask):
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
-        # state = np.around(np.array([
-        #         scaled_x, scaled_y, scaled_z,
-        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-        #         del_z ]), decimals=2)
-
         state = np.around(np.array([
-                pose.position.x, pose.position.y, pose.position.z,
-                linear_acceleration.x, linear_acceleration.y, linear_acceleration.z,
+                scaled_x, scaled_y, scaled_z,
+                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
                 del_z ]), decimals=2)
+
+        # state = np.around(np.array([
+        #         pose.position.x, pose.position.y, pose.position.z,
+        #         linear_acceleration.x, linear_acceleration.y, linear_acceleration.z,
+        #         del_z ]), decimals=2)
 
         self.last_x = pose.position.x
         self.last_y = pose.position.y
@@ -103,17 +103,17 @@ class Hover(BaseTask):
 #                accelerate_reward = linear_acceleration.z * reward_beta
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
-        #reward = distance_reward - accelerate_reward
-        if pose.position.z <= 5.0:
-            reward = distance_reward
-        else:
-            reward = distance_reward - abs(vel_z * 10)
+        reward = distance_reward - accelerate_reward
+        # if pose.position.z <= 5.0:
+        #     reward = distance_reward
+        # else:
+        #     reward = distance_reward - abs(vel_z * 10)
         
-        # print('==========')
-        # print('height:', pose.position.z)
-        # print('reward:', reward)
-        # print('distance:', distance_reward)
-        # print('accelerate:', accelerate_reward)
+        print('==========')
+        print('height:', pose.position.z)
+        print('reward:', reward)
+        print('distance:', distance_reward)
+        print('accelerate:', accelerate_reward)
         
         # target_val = max(self.final_target / self.takeoff_duration * timestamp, 5)
 
