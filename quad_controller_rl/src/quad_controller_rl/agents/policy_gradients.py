@@ -58,15 +58,13 @@ class DDPG(BaseAgent):
         self.stats_filename = os.path.join(
             util.get_param('out'),
             "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
-        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
+        print("Saving stats to {}".format(self.stats_filename))  # [debug]
 
         # Save Q stats
         self.q_stats_filename = os.path.join(
             util.get_param('out'),
             "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.q_stats_columns = ['episode', 'Q_value']  # specify columns to save
-        print("Saving q stats {} to {}".format(self.q_stats_columns, self.q_stats_filename))  # [debug]
+         print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
 
 
     def reset_episode_vars(self):
@@ -102,8 +100,8 @@ class DDPG(BaseAgent):
             # Write episode stats
             # 241
             #print('episode ', self.episode_num, ' step count: ', self.count)
-            self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
-            self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
+            self.write_stats([self.episode_num, self.total_reward], ['episode', 'total_reward'], self.stats_filename)
+            self.write_stats([self.episode_num, np.mean(self.total_q)], ['episode', 'Q_value'], self.q_stats_filename)
             self.episode_num += 1
             self.reset_episode_vars()
             #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
@@ -169,9 +167,9 @@ class DDPG(BaseAgent):
         self.soft_update(self.critic_local.model, self.critic_target.model)
         self.soft_update(self.actor_local.model, self.actor_target.model)
 
-    def write_stats(self, stats, file_name):
+    def write_stats(self, stats, stats_columns, file_name):
         """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
+        df_stats = pd.DataFrame([stats], columns=stats_columns)  # single-row dataframe
         df_stats.to_csv(file_name, mode='a', index=False,
             header=not os.path.isfile(file_name))  # write header first time only
 
