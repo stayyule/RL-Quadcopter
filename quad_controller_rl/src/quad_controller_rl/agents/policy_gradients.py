@@ -64,7 +64,7 @@ class DDPG(BaseAgent):
         self.q_stats_filename = os.path.join(
             util.get_param('out'),
             "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-         print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
+        print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
 
 
     def reset_episode_vars(self):
