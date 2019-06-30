@@ -106,7 +106,7 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.5
-        reward_beta = 0.5
+        reward_beta = 1
 
         #distance = np.linalg.norm([del_x, del_y, del_z])
         distance = min(abs(self.target_z - pose.position.z), 10.0)
