@@ -39,8 +39,7 @@ class RandomPolicySearch(BaseAgent):
         print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
 
     def reset_episode_vars(self):
-        self.last_state = None
-        self.last_action = None
+
         self.total_reward = 0.0
         self.count = 0
 
@@ -52,10 +51,8 @@ class RandomPolicySearch(BaseAgent):
         # Choose an action
         action = self.act(state)
         
-        # Save experience / reward
-        if self.last_state is not None and self.last_action is not None:
-            self.total_reward += reward
-            self.count += 1
+        self.total_reward += reward
+        self.count += 1
 
         # Learn, if at end of episode
         if done:
@@ -63,9 +60,6 @@ class RandomPolicySearch(BaseAgent):
             self.reset_episode_vars()
             self.write_stats([self.episode_num, self.total_reward])
             self.episode_num += 1
-
-        self.last_state = state
-        self.last_action = action
 
         # Return complete action vector
         complete_action = action
