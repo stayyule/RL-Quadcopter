@@ -1,371 +1,263 @@
-import numpy as np
-from quad_controller_rl.agents.base_agent import BaseAgent
-
-from keras import layers, models, optimizers
-from keras import backend as K
-
+"""Policy gradient agent."""
 import os
+
+import numpy as np
 import pandas as pd
 from quad_controller_rl import util
-
-import random
-
-from collections import namedtuple
-
-Experience = namedtuple("Experience",
-    field_names=["state", "action", "reward", "next_state", "done"])
-
-
-class DDPG(BaseAgent):
-    """Reinforcement Learning agent that learns using DDPG."""
-    def __init__(self, task):
-        # Task State Action
-        self.task = task  # should contain observation_space and action_space
-
-        self.state_size = 7
-        self.action_size = 1
-
-        # Actor (Policy) Model
-        self.actor_local = Actor(self.state_size, self.action_size)
-        self.actor_target = Actor(self.state_size, self.action_size)
-
-        # Critic (Value) Model
-        self.critic_local = Critic(self.state_size, self.action_size)
-        self.critic_target = Critic(self.state_size, self.action_size)
-
-        # Initialize target model parameters with local model parameters
-        self.critic_target.model.set_weights(self.critic_local.model.get_weights())
-        self.actor_target.model.set_weights(self.actor_local.model.get_weights())
-
-        # Noise process
-        self.noise = OUNoise(self.action_size)
-
-        # Replay memory
-        self.buffer_size = 100000
-        self.batch_size = 128
-        self.memory = ReplayBuffer(self.buffer_size)
-
-        # Algorithm parameters
-        self.gamma = 0.99 # discount factor
-        self.tau = 0.005 # for soft update of target parameters
-
-        self.reset_episode_vars()
-
-        self.epsilon = 1
-        self.episode_num = 1
-
-        # Save episode stats
-        self.stats_filename = os.path.join(
-            util.get_param('out'),
-            "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
-        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
-
-        # Save Q stats
-        self.q_stats_filename = os.path.join(
-            util.get_param('out'),
-            "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.q_stats_columns = ['episode', 'Q_value']  # specify columns to save
-        print("Saving q stats {} to {}".format(self.q_stats_columns, self.q_stats_filename))  # [debug]
-
-
-    def reset_episode_vars(self):
-        self.last_state = None
-        self.last_action = None
-        self.total_reward = 0.0
-        self.total_q = 0.0
-        self.count = 0
-
-    def step(self, state, reward, done):
-
-        # Choose an action
-        action = self.act(state)
-        self.count += 1
-        
-        # Save experience / reward
-        if self.last_state is not None and self.last_action is not None:
-            self.memory.add(self.last_state, self.last_action, reward, state, done)
-            self.total_reward += reward
-
-        #...
-        # Learn, if enough samples are available in memory
-        if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample(self.batch_size)
-            #print('experience:', experiences)
-            self.learn(experiences)
-        #...
-        if done:
-            # Write episode stats
-            # 241
-            #print('episode ', self.episode_num, ' step count: ', self.count)
-            self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
-            self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
-            self.episode_num += 1
-            self.reset_episode_vars()
-            #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
-
-        self.last_state = state
-        self.last_action = action
-
-        # Return complete action vector
-        complete_action = np.zeros(6)
-        #print('step action:', complete_action.reshape(1,-1))
-        ## tanh
-        complete_action[2] = np.array(action).reshape(1) * 25
-        # sigmoid
-        #complete_action[2] = np.array(action).reshape(1) * 50 -25
-        return complete_action
-
-    def act(self, states):
-        """Returns actions [-1,1] for given state(s) as per current policy."""
-        #print('states before act:', states)
-        states = np.reshape(states, [-1, self.state_size])
-        #print('states with shape:', states)
-        actions = self.actor_local.model.predict(states)
-        noise_val = self.noise.sample()
-        #noise_epsilon = self.epsilon
-        noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
-        #if len(self.memory) > self.batch_size:
-        #    return np.around(actions + noise_epsilon * noise_val, decimals=2) # add some noise for exploration
-        #else:
-        #    return np.around(noise_epsilon * noise_val, decimals=2)
-        #tanh
-        final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
-        #sigmoid
-        #final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), 0, 1)
-        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", np.around(final_action,decimals=2))
-
-        return final_action
-
-    def learn(self, experiences):
-        """Update policy and value parameters using given batch of experience tuples."""
-        # Convert experience tuples to separate arrays for each element (states, actions, rewards, etc.)
-        states = np.vstack([e.state for e in experiences if e is not None])
-        actions = np.array([e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.action_size)
-        rewards = np.array([e.reward for e in experiences if e is not None]).astype(np.float32).reshape(-1, 1)
-        dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1, 1)
-        next_states = np.vstack([e.next_state for e in experiences if e is not None])
-
-        # Get predicted next-state actions and Q values from target models
-        # Q_targets_next = critic_target(next_state, actor_target(next_state))
-        actions_next = self.actor_target.model.predict_on_batch(next_states)
-        Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
-        #print('Q next:', Q_targets_next)
-
-        # Compute Q targets for current states and train critic model (local)
-        Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
-        self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
-        #print(states, actions, Q_targets)
-        # Train actor model (local)
-        action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
-        #print('action_gradients:', action_gradients)
-        self.actor_local.train_fn([states, action_gradients, 1]) # custom training function
-
-        # Soft-update target model
-        self.soft_update(self.critic_local.model, self.critic_target.model)
-        self.soft_update(self.actor_local.model, self.actor_target.model)
-
-    def write_stats(self, stats, file_name):
-        """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
-        df_stats.to_csv(file_name, mode='a', index=False,
-            header=not os.path.isfile(file_name))  # write header first time only
-
-    def soft_update(self, local_model, target_model):
-        """Soft update model params"""
-        local_weights = np.array(local_model.get_weights())
-        target_weights = np.array(target_model.get_weights())
-
-        new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
-        target_model.set_weights(new_weights)
-
-
-
-
-class Actor:
-    """Actor (Policy) Model."""
-
-    def __init__(self, state_size, action_size):
-        """Initialize parameters and build model.
-
-        Params
-        ======
-        state_size (int): Dimension of each state
-        action_size (int): Dimension of each action
-        action_low (array): Min value of each action dimension
-        action_high (array): Max value of each action dimension
-        """
-        self.state_size = state_size
-        self.action_size = action_size
-
-        # Initialize any other variables here
-        self.hidden_layer1 = 64
-        self.hidden_layer2 = 64
-        self.learning_rate = 0.0001
-
-        self.build_model()
-
-    def build_model(self):
-        """Build an actor (policy) network that maps states -> actions."""
-        # Define input layer (states)
-        states = layers.Input(shape=(self.state_size,), name='states')
-
-        # Add hidden layers
-        net = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
-        net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
-
-        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
-
-        # Add final output layer with sigmoid activation
-        # -----kernel
-        actions = layers.Dense(units=self.action_size, activation='tanh',
-        name='raw_actions',
-        kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
-
-        # Scale [-1, 1] output for each action dimension to proper range
-        #actions = layers.Lambda(lambda x: x * self.action_range / 2,
-        #name='actions')(raw_actions)
-
-        # Create Keras model
-        self.model = models.Model(inputs=states, outputs=actions)
-
-        # Define loss function using action value (Q value) gradients
-        action_gradients = layers.Input(shape=(self.action_size,))
-
-        loss = K.mean( action_gradients * (actions))
-
-        # Incorporate any additional losses here (e.g. from regularizers)
-
-        # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=self.learning_rate)
-        updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss, constraints=[])
-        self.train_fn = K.function(
-            inputs=[self.model.input, action_gradients, K.learning_phase()],
-            outputs=[],
-            updates=updates_op)
-
-
-class Critic:
-    """Critic (Value) Model."""
-
-    def __init__(self, state_size, action_size):
-        """Initialize parameters and build model.
-
-        Params
-        ======
-        state_size (int): Dimension of each state
-        action_size (int): Dimension of each action
-        """
-        self.state_size = state_size
-        self.action_size = action_size
-
-        # Initialize any other variables here
-        self.hidden_layer1 = 64
-        self.hidden_layer2 = 64
-        self.learning_rate = 0.001
-        self.build_model()
-
-    def build_model(self):
-        """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
-        # Define input layers
-        states = layers.Input(shape=(self.state_size,), name='states')
-        actions = layers.Input(shape=(self.action_size,), name='actions')
-
-        # Add hidden layer(s) for state pathway
-        net_states = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
-        #net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
-
-        # Add hidden layer(s) for action pathway
-        #net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
-        #net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
-
-        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
-
-        # Combine state and action pathways
-        # net = layers.Add()([net_states, net_actions])
-        # net = layers.Activation('relu')(net)
-        # Concatenate state and action values
-        net = layers.Concatenate(axis=-1)([net_states, actions])
-        net = layers.Activation('relu')(net)
-        net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
-
-        # Add more layers to the combined network if needed
-
-
-        # Add final output layer to prduce action values (Q values)
-        Q_values = layers.Dense(units=1, name='q_values',
-        kernel_initializer=layers.initializers.RandomUniform(minval=-3e-3,maxval=3e-3))(net)
-
-        # Create Keras model
-        self.model = models.Model(inputs=[states, actions], outputs=Q_values)
-
-        # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam(lr=self.learning_rate)
-        self.model.compile(optimizer=optimizer, loss='mse')
-
-        # Compute action gradients (derivative of Q values w.r.t. to actions)
-        action_gradients = K.gradients(Q_values, actions)
-
-        # Define an additional function to fetch action gradients (to be used by actor model)
-        self.get_action_gradients = K.function(
-            inputs=[*self.model.input, K.learning_phase()],
-            outputs=action_gradients)
-
-
+from quad_controller_rl.agents.base_agent import BaseAgent
+
+import tensorflow as tf
+
+class ReplayBuffer:
+
+    def __init__(self, maxlen, action_shape, state_shape, dtype=np.float32):
+        """Initialize a ReplayBuffer object."""
+        self.maxlen = maxlen
+        self.start = 0
+        self.length = 0
+        self.state_data = np.zeros((maxlen,) + state_shape).astype(dtype)
+        self.action_data = np.zeros((maxlen,) + action_shape).astype(dtype)
+        self.reward_data = np.zeros((maxlen,1)).astype(dtype)
+        self.next_state_data = np.zeros((maxlen,) + state_shape).astype(dtype)
+        self.done_data = np.zeros((maxlen,1)).astype(dtype)
+    
+    def add(self, state, action, reward, next_state, done):
+        """Add a new experience to memory."""
+        if self.length == self.maxlen:
+            self.start = (self.start + 1) % self.maxlen
+        else:
+            self.length += 1
+        idx = (self.start + self.length - 1) % self.maxlen
+        self.state_data[idx] = state
+        self.action_data[idx] = action
+        self.reward_data[idx] = reward
+        self.next_state_data[idx] = next_state
+        self.done_data[idx] = done
+    
+    def sample(self, batch_size=64):
+        """Randomly sample a batch of experiences from memory."""
+        idxs = np.random.random_integers(self.length - 1, size=batch_size)
+        sampled = {'states':self.set_min_ndim(self.state_data[idxs]),
+                   'actions':self.set_min_ndim(self.action_data[idxs]),
+                   'rewards':self.set_min_ndim(self.reward_data[idxs]),
+                   'next_states':self.set_min_ndim(self.next_state_data[idxs]),
+                   'dones':self.set_min_ndim(self.done_data[idxs])}
+        return sampled
+    
+    def set_min_ndim(self,x):
+        """set numpy array minimum dim to 2 (for sampling)"""
+        if x.ndim < 2:
+            return x.reshape(-1,1)
+        else:
+            return x
+
+    def __len__(self):
+        return self.length
+    
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
-
-    def __init__(self, size, mu=None, theta=0.15, sigma=0.2):
+    #0.15 0.3
+    def __init__(self, size, mu=None, theta=0.15, sigma=0.02, dt=1e-2):
         """Initialize parameters and noise process."""
         self.size = size
         self.mu = mu if mu is not None else np.zeros(self.size)
         self.theta = theta
         self.sigma = sigma
+        self.dt = dt
         self.state = np.ones(self.size) * self.mu
         self.reset()
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
-        self.state = self.mu
+        self.state = np.ones(self.size) * self.mu
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
+        dx = self.theta * (self.mu - x) * self.dt + self.sigma * np.sqrt(self.dt) * np.random.randn(len(x))
         self.state = x + dx
         return self.state
-
-
-
-class ReplayBuffer:
-    """Fixed-size circular buffer to store experience tuples."""
-
-    def __init__(self, size=1000):
-        """Initialize a ReplayBuffer object."""
-        self.size = size  # maximum size of buffer
-        self.memory = []  # internal memory (list)
-        self.idx = 0  # current index into circular buffer
     
-    def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
-        e = Experience(state, action, reward, next_state, done)
-        #print(e)
-        if len(self.memory) < self.size:
-            self.memory.append(e)
-        else:
-            self.memory[self.idx] = e
-            self.idx = (self.idx + 1) % self.size
+class A2C:
+    def __init__(self, state_shape, action_shape, actor_lr=0.001, critic_lr=0.001, gamma=0.99):
+        tf.reset_default_graph()
+        self.state_shape = state_shape
+        self.action_shape = action_shape
+        self.nb_actions = np.prod(self.action_shape)
+        self.actor_lr = actor_lr
+        self.critic_lr = critic_lr
+        self.gamma = gamma
+        
+        #inputs
+        self.input_state = tf.placeholder(tf.float32, (None,) + self.state_shape, name='input_state')
+        self.input_action = tf.placeholder(tf.float32, (None,) + self.action_shape, name='input_action')
+        self.input_state_target = tf.placeholder(tf.float32, (None,) + self.state_shape, name='input_state_target')
+        self.rewards = tf.placeholder(tf.float32, (None,1), name='rewards')
+        self.dones =tf.placeholder(tf.float32, (None,1), name='dones')
+        
+        #local and target nets
+        self.actor = self.actor_net(self.input_state, self.nb_actions,name='actor')
+        self.critic = self.critic_net(self.input_state, self.input_action,name='critic')
+        self.actor_and_critic = self.critic_net(self.input_state,self.actor,name='critic',reuse=True)
+        
+        self.actor_target = self.actor_net(self.input_state_target, self.nb_actions, name='target_actor')
+        self.actor_and_critic_target = self.critic_net(self.input_state_target,
+                                                       self.actor_target, name='target_critic')
+        
+        self.actor_loss, self.critic_loss = self.set_model_loss(self.critic, self.actor_and_critic,
+                                                                self.actor_target, self.actor_and_critic_target,
+                                                                self.rewards, self.dones, self.gamma)
+        
+        self.actor_opt, self.critic_opt = self.set_model_opt(self.actor_loss, self.critic_loss,
+                                                             self.actor_lr, self.critic_lr)
+        
     
-    def sample(self, batch_size=64):
+    def actor_net(self, state, nb_actions, name, reuse=False, training=True):
+        with tf.variable_scope(name, reuse=reuse):
+            x = tf.layers.Dense(64,activation=tf.nn.relu)(state)
+            x = tf.layers.Dense(64,activation=tf.nn.relu)(x)
+            actions = tf.layers.Dense(nb_actions,
+                                      activation=tf.tanh,
+                                      kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))(x)
+            return actions
+    
+    def critic_net(self, state, action, name, reuse=False, training=True):
+        with tf.variable_scope(name, reuse=reuse):
+            x = tf.layers.Dense(64,activation=tf.nn.relu)(state)
+            x = tf.concat([x, action], axis=-1)
+            x = tf.layers.Dense(64,activation=tf.nn.relu)(x)
+            q = tf.layers.Dense(1,kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))(x)
+            return q
+    
+    def set_model_loss(self, critic, actor_and_critic, actor_target, actor_and_critic_target, rewards, dones, gamma):
+        Q_targets = rewards + (gamma * actor_and_critic_target) * (1. - dones)
+        actor_loss = tf.reduce_mean(-actor_and_critic)
+        tf.losses.add_loss(actor_loss)
+        critic_loss = tf.losses.huber_loss(Q_targets,critic)
+        return actor_loss, critic_loss
+    
+    def set_model_opt(self, actor_loss, critic_loss, actor_lr, critic_lr):
+        train_vars = tf.trainable_variables()
+        actor_vars = [var for var in train_vars if var.name.startswith('actor')]
+        critic_vars = [var for var in train_vars if var.name.startswith('critic')]
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            actor_opt = tf.train.AdamOptimizer(actor_lr).minimize(actor_loss, var_list=actor_vars)
+            critic_opt = tf.train.AdamOptimizer(critic_lr).minimize(critic_loss, var_list=critic_vars)
+        return actor_opt, critic_opt
+    
+        
+class DDPGtakeoff(BaseAgent):
+    """Reinforcement Learning agent that learns using DDPG."""
+    def __init__(self, task):
+        self.task = task  # should contain observation_space and action_space
+        self.state_shape = (7,)
+        self.action_shape = (1,)
+        self.nb_actions = np.prod(self.action_shape)
+        self.action_range = self.task.action_space.high[2]-self.task.action_space.low[2]
+        
+        # Replay memory
+        self.buffer_size = 100000
+        self.batch_size =64
+        self.memory = ReplayBuffer(self.buffer_size,self.action_shape, self.state_shape)
+        
+        # Noise process
+        self.noise = OUNoise(self.nb_actions)
+        
+        # Algorithm parameters
+        self.gamma = 0.99  # discount factor
+        self.tau = 0.005 # 0.005
+        self.actor_lr = 0.0001  #0.0001
+        self.critic_lr = 0.001
+        
+        #initialize
+        self.a2c = A2C(self.state_shape, self.action_shape, actor_lr=self.actor_lr, critic_lr=self.critic_lr,
+                       gamma=self.gamma)
+        self.initialize()
+        
+        # Save episode stats
+        self.stats_filename = os.path.join(
+            util.get_param('out'),
+            "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
+        self.episode_num = 1
+        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
+        #initial episode vars
+        self.last_state = None
+        self.last_action = None
+        self.total_reward = 0.0
+        self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
+        
+    def write_stats(self, stats):
+        """Write single episode stats to CSV file."""
+        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
+        df_stats.to_csv(self.stats_filename, mode='a', index=False,
+            header=not os.path.isfile(self.stats_filename))  # write header first time only
+        
+    def reset_episode_vars(self):
+        self.last_state = None
+        self.last_action = None
+        self.total_reward = 0.0
+        self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
+        
+    def step(self, state, reward, done):
+        action = self.act(state[None,:])
+        self.count += 1
+        if self.last_state is not None and self.last_action is not None:
+            self.total_reward += reward
+            self.memory.add(self.last_state, self.last_action, reward, state, done)
+        if (len(self.memory) > self.batch_size):
+            experiences = self.memory.sample(self.batch_size)
+            self.learn(experiences)
+        self.last_state = state
+        self.last_action = action
+        self.acts[2] = action * self.action_range * 0.5
+        if done:
+            self.write_stats([self.episode_num, self.total_reward])
+            self.episode_num += 1
+            print('total reward={:7.4f}, count={}'.format(self.total_reward,self.count))
+            self.reset_episode_vars()
+        return self.acts
 
-        """Randomly sample a batch of experiences from memory."""
-        return random.sample(self.memory, k=batch_size)
-        # self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
-        # return self.memory[:batch_size]
+    def act(self, states):
+        """Returns actions for given state(s) as per current policy."""
+        actions = self.sess.run(self.a2c.actor, feed_dict={self.a2c.input_state:states})
+        return actions + self.noise.sample()
 
-    def __len__(self):
-        """Return the current size of internal memory."""
-        return len(self.memory)
-
-    def get_reward(self, exp):
-        return exp[2]
+    def learn(self, experiences):
+        """Update policy and value parameters using given batch of experience tuples."""
+        states = experiences['states']
+        actions = experiences['actions']
+        rewards = experiences['rewards']
+        next_states = experiences['next_states']
+        dones = experiences['dones']
+        
+        #actor critic update
+        self.sess.run([self.a2c.actor_opt,self.a2c.critic_opt],feed_dict={self.a2c.input_state:states,
+                                                                              self.a2c.input_action:actions,
+                                                                              self.a2c.input_state_target:next_states,
+                                                                              self.a2c.rewards:rewards,
+                                                                              self.a2c.dones:dones})
+        #target soft update
+        self.sess.run(self.soft_update_ops)
+        
+        
+    def initialize(self):
+        self.sess = tf.Session()
+        self.sess.run(tf.global_variables_initializer())
+        actor_var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='actor')
+        actor_target_var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='target_actor')
+        critic_var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='critic')
+        critic_target_var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='target_critic')
+        target_init_ops = []
+        soft_update_ops = []
+        for var, target_var in zip(actor_var, actor_target_var):
+            target_init_ops.append(tf.assign(target_var,var))
+            soft_update_ops.append(tf.assign(target_var, (1. - self.tau) * target_var + self.tau * var))
+        for var, target_var in zip(critic_var, critic_target_var):
+            target_init_ops.append(tf.assign(target_var,var))
+            soft_update_ops.append(tf.assign(target_var, (1. - self.tau) * target_var + self.tau * var))
+        self.soft_update_ops = soft_update_ops
+        self.sess.run(target_init_ops)
+            

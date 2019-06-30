@@ -3,10 +3,6 @@
 import numpy as np
 from quad_controller_rl.agents.base_agent import BaseAgent
 
-import os
-import pandas as pd
-from quad_controller_rl import util
-
 class RandomPolicySearch(BaseAgent):
     """Sample agent that searches for optimal policy randomly."""
 
@@ -30,13 +26,6 @@ class RandomPolicySearch(BaseAgent):
 
         # Episode variables
         self.reset_episode_vars()
-        # Save episode stats
-        self.stats_filename = os.path.join(
-            util.get_param('out'),
-            "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
-        self.episode_num = 1
-        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
 
     def reset_episode_vars(self):
         self.last_state = None
@@ -61,19 +50,10 @@ class RandomPolicySearch(BaseAgent):
         if done:
             self.learn()
             self.reset_episode_vars()
-            self.write_stats([self.episode_num, self.total_reward])
-            self.episode_num += 1
 
         self.last_state = state
         self.last_action = action
-
-        # Return complete action vector
-        complete_action = action
-        #print('action', action)
-        complete_action[0][-3:] = np.zeros(3) # linear force only
-        complete_action[0][:2] = np.zeros(2) # z only
-        return complete_action
-
+        return action
 
     def act(self, state):
         # Choose action based on given state and policy
@@ -96,9 +76,3 @@ class RandomPolicySearch(BaseAgent):
         print("RandomPolicySearch.learn(): t = {:4d}, score = {:7.3f} (best = {:7.3f}), noise_scale = {}".format(
                 self.count, score, self.best_score, self.noise_scale))  # [debug]
         #print(self.w)  # [debug: policy parameters]
-
-    def write_stats(self, stats):
-        """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
-        df_stats.to_csv(self.stats_filename, mode='a', index=False,
-            header=not os.path.isfile(self.stats_filename))  # write header first time only

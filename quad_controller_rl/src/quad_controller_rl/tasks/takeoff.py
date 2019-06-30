@@ -14,7 +14,7 @@ class Takeoff(BaseTask):
         self.observation_space = spaces.Box(
             np.array([- cube_size / 2, - cube_size / 2,       0.0, -1.0, -1.0, -1.0, -1.0]),
             np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))
-        print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
+        #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
         max_force = 25.0
@@ -22,7 +22,7 @@ class Takeoff(BaseTask):
         self.action_space = spaces.Box(
             np.array([-max_force, -max_force, -max_force, -max_torque, -max_torque, -max_torque]),
             np.array([ max_force,  max_force,  max_force,  max_torque,  max_torque,  max_torque]))
-        print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
+        #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
 
         # Task-specific parameters
         self.max_duration = 5.0  # secs
@@ -54,15 +54,10 @@ class Takeoff(BaseTask):
             reward -= 10.0  # extra penalty
             done = True
 
-        print('==========')
-        print('height:', pose.position.z)
-        print('reward:', reward)    
-        print('target:', self.target_z)
-
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
-        #print("next action:", action)
+
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
