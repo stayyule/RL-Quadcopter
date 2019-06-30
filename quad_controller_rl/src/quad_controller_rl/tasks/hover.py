@@ -121,11 +121,13 @@ class Hover(BaseTask):
         accelerate_reward = abs(vel_z) * reward_beta
 
         #reward = distance_reward - accelerate_reward
-        if pose.position.z <= 5.0:
-            reward = distance_reward
-        else:
-            reward = distance_reward - accelerate_reward
+        # if pose.position.z <= 5.0:
+        #     reward = distance_reward
+        # else:
+        #     reward = distance_reward - accelerate_reward
         
+        reward = -min(abs(self.target_z - pose.position.z), 20.0) - abs(del_z)
+
         print('==========')
         print('height:', pose.position.z)
         print('reward:', reward)
