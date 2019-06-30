@@ -69,9 +69,12 @@ class Hover(BaseTask):
         # vel_y = pose.position.y - self.last_y
         # vel_z = pose.position.z - self.last_z
         print('timestamp:', timestamp, 'last time:', self.last_time)
-        vel_x = (pose.position.x - self.last_x) / (timestamp - self.last_time)
-        vel_y = (pose.position.y - self.last_y) / (timestamp - self.last_time)
-        vel_z = (pose.position.z - self.last_z) / (timestamp - self.last_time)
+        if timestamp != self.last_time:
+            vel_x = (pose.position.x - self.last_x) / (timestamp - self.last_time)
+            vel_y = (pose.position.y - self.last_y) / (timestamp - self.last_time)
+            vel_z = (pose.position.z - self.last_z) / (timestamp - self.last_time)
+        else:
+            vel_x = vel_y = vel_z = 0.0
         
         del_x = (self.target_x - pose.position.x) / self.scale
         del_y = (self.target_y - pose.position.y) / self.scale
