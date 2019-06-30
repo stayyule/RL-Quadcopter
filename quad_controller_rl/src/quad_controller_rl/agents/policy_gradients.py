@@ -95,7 +95,9 @@ class DDPG(BaseAgent):
             experiences = self.memory.sample(self.batch_size)
             #print('experience:', experiences)
             self.learn(experiences)
-        #...
+        else:
+            action = 1.0
+            
         if done:
             # Write episode stats
             # 241
