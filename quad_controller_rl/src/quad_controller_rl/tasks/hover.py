@@ -40,6 +40,7 @@ class Hover(BaseTask):
         self.scale = 15.0
 
         self.final_target = 10.0
+        self.last_time = 0.0
 
     def reset(self):
         self.last_x = 0.0
@@ -47,6 +48,7 @@ class Hover(BaseTask):
         self.last_z = 0.0
         self.linear_vel = 0.0
         self.action = None
+        self.last_time = 0.0
         # Nothing to reset; just return initial condition
         return Pose(
                 position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
@@ -59,27 +61,34 @@ class Hover(BaseTask):
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
         # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
 
-        scaled_x = pose.position.x / self.scale * 5.0
-        scaled_y = pose.position.y / self.scale * 5.0
-        scaled_z = pose.position.z / self.scale * 5.0
+        scaled_x = pose.position.x / self.scale
+        scaled_y = pose.position.y / self.scale
+        scaled_z = pose.position.z / self.scale
 
-        vel_x = pose.position.x - self.last_x
-        vel_y = pose.position.y - self.last_y
-        vel_z = pose.position.z - self.last_z
+        # vel_x = pose.position.x - self.last_x
+        # vel_y = pose.position.y - self.last_y
+        # vel_z = pose.position.z - self.last_z
 
-        # del_x = (self.target_x - pose.position.x) / self.scale * 5.0
-        # del_y = (self.target_y - pose.position.y) / self.scale * 5.0
-        # del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+        vel_x = (pose.position.x - self.last_x) / (timestamp - self.last_time)
+        vel_y = (pose.position.y - self.last_y) / (timestamp - self.last_time)
+        vel_z = (pose.position.z - self.last_z) / (timestamp - self.last_time)
+        
+        del_x = (self.target_x - pose.position.x) / self.scale
+        del_y = (self.target_y - pose.position.y) / self.scale
+        del_z = (self.target_z - pose.position.z) / self.scale
 
-        del_x = self.target_x - pose.position.x
-        del_y = self.target_y - pose.position.y
-        del_z = self.target_z - pose.position.z
+        # del_x = self.target_x - pose.position.x
+        # del_y = self.target_y - pose.position.y
+        # del_z = self.target_z - pose.position.z
 
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
-                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+                vel_x, vel_y, vel_z,
                 del_z ]), decimals=2)
-
+        # state = np.around(np.array([
+        #         scaled_x, scaled_y, scaled_z,
+        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
+        #         del_z ]), decimals=2)
         # state = np.around(np.array([
         #         pose.position.x, pose.position.y, pose.position.z,
         #         linear_acceleration.x, linear_acceleration.y, linear_acceleration.z,
@@ -88,6 +97,7 @@ class Hover(BaseTask):
         self.last_x = pose.position.x
         self.last_y = pose.position.y
         self.last_z = pose.position.z
+        self.last_time = timestamp
 
         self.linear_vel += linear_acceleration.z
         # Compute reward / penalty and check if this episode is complete
@@ -119,6 +129,7 @@ class Hover(BaseTask):
         print('reward:', reward)
         print('distance:', distance_reward)
         print('accelerate:', accelerate_reward)
+        print('vel:', vel_z)
         
         # target_val = max(self.final_target / self.takeoff_duration * timestamp, 5)
 
@@ -127,6 +138,10 @@ class Hover(BaseTask):
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty
+            done = True
+
+        if pose.position.z > 20.0:
+            reward -= 10
             done = True
 
         # Take one RL step, passing in current state and reward, and obtain action
