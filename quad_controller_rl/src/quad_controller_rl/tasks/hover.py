@@ -106,27 +106,19 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.5
-        reward_beta = 0.1
-        distance = np.linalg.norm([del_x, del_y, del_z])
+        reward_beta = 0.5
+
+        #distance = np.linalg.norm([del_x, del_y, del_z])
+        distance = min(abs(self.target_z - pose.position.z), 10.0)
 
         distance_reward =  - distance * reward_alpha
-
-#        if pose.position.z < 1:
-#            accelerate_reward = 0
-#        else:
-#            if pose.position.z < self.target_z:
-#                accelerate_reward = - linear_acceleration.z * reward_beta
-#            else:
-#                accelerate_reward = linear_acceleration.z * reward_beta
         accelerate_reward = abs(vel_z) * reward_beta
 
-        #reward = distance_reward - accelerate_reward
-        # if pose.position.z <= 5.0:
-        #     reward = distance_reward
-        # else:
-        #     reward = distance_reward - accelerate_reward
-        
-        reward = -min(abs(self.target_z - pose.position.z), 10.0) - accelerate_reward
+        reward = distance_reward - accelerate_reward
+        if pose.position.z <= 5.0:
+            reward = distance_reward
+        else:
+            reward = distance_reward - accelerate_reward
 
         print('==========')
         print('height:', pose.position.z)
