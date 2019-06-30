@@ -33,6 +33,7 @@ class Combined(BaseTask):
         self.target_x = 0.0
         self.target_y = 0.0
         self.target_z = 10.0
+        self.land_target_z = 10.0
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -109,7 +110,7 @@ class Combined(BaseTask):
         reward = distance_reward - accelerate_reward
 
         if timestamp > self.landing_start and self.hovered:
-           self.target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+           self.target_z = max ((self.land_target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
         if del_z < 0.1 and self.target_z == 10.0:
             self.hovered = True
         
