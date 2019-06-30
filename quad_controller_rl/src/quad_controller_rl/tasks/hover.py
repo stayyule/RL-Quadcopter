@@ -51,7 +51,7 @@ class Hover(BaseTask):
         self.last_time = 0.0
         # Nothing to reset; just return initial condition
         return Pose(
-                position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
+                position=Point(0.0, 0.0, 0.1),  # drop off from a slight random height
                 orientation=Quaternion(0.0, 0.0, 0.0, 0.0),
             ), Twist(
                 linear=Vector3(0.0, 0.0, 0.0),
