@@ -126,7 +126,7 @@ class Hover(BaseTask):
         # else:
         #     reward = distance_reward - accelerate_reward
         
-        reward = -min(abs(self.target_z - pose.position.z), 10.0) - abs(del_z)
+        reward = -min(abs(self.target_z - pose.position.z), 10.0) - abs(vel_z)
 
         print('==========')
         print('height:', pose.position.z)
@@ -145,7 +145,6 @@ class Hover(BaseTask):
             done = True
 
         if pose.position.z > 20.0:
-            reward -= 10
             done = True
 
         # Take one RL step, passing in current state and reward, and obtain action
