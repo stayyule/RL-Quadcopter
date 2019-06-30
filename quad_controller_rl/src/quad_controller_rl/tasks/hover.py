@@ -46,6 +46,7 @@ class Hover(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
         self.linear_vel = 0.0
+        self.action = None
         # Nothing to reset; just return initial condition
         return Pose(
                 position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
