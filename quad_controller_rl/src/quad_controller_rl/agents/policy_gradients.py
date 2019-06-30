@@ -97,7 +97,7 @@ class DDPG(BaseAgent):
             self.learn(experiences)
         else:
             action = 1.0
-            
+
         if done:
             # Write episode stats
             # 241
@@ -128,7 +128,7 @@ class DDPG(BaseAgent):
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
         #noise_epsilon = self.epsilon
-        noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
+        noise_epsilon = self.epsilon / ( int(self.episode_num / 30 ) + 1)
         #if len(self.memory) > self.batch_size:
         #    return np.around(actions + noise_epsilon * noise_val, decimals=2) # add some noise for exploration
         #else:
