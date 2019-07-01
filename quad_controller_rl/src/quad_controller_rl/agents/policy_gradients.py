@@ -95,7 +95,7 @@ class DDPG(BaseAgent):
             #print('experience:', experiences)
             self.learn(experiences)
         else:
-            action = 1.0
+            action = np.array([1.0]).reshape(1,-1)
 
         if done:
             # Write episode stats
@@ -361,13 +361,13 @@ class ReplayBuffer:
 
         """Randomly sample a batch of experiences from memory."""
         prioritized_batch1 = self.memory[:int(batch_size/2.0)]
-        print(prioritized_batch1)
+        #print(prioritized_batch1)
         prioritized_batch2 = random.sample(self.memory[int(batch_size/2.0) + 1:], k=int(batch_size/2.0))
-        print(prioritized_batch2)
-        print(prioritized_batch1 + prioritized_batch2)
-        return random.sample(self.memory, k=batch_size)
+        #print(prioritized_batch2)
+        #print(prioritized_batch1 + prioritized_batch2)
+        #return random.sample(self.memory, k=batch_size)
          
-        # return self.memory[:batch_size]
+        return prioritized_batch1 + prioritized_batch2
 
     def __len__(self):
         """Return the current size of internal memory."""
