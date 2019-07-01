@@ -41,6 +41,7 @@ class Hover(BaseTask):
 
         self.final_target = 10.0
         self.last_time = 0.0
+        self.last_action = None
 
     def reset(self):
         self.last_x = 0.0
@@ -48,6 +49,7 @@ class Hover(BaseTask):
         self.last_z = 0.0
 
         self.action = None
+        self.last_action = None
         self.last_time = 0.0
         # Nothing to reset; just return initial condition
         return Pose(
@@ -108,13 +110,14 @@ class Hover(BaseTask):
         done = False
         
         reward_alpha = 0.5
-        reward_beta = 1
+        reward_beta = 0.5
 
         #distance = np.linalg.norm([del_x, del_y, del_z])
         distance = min(abs(self.target_z - pose.position.z), 10.0)
 
         distance_reward = (10 - distance) * reward_alpha
-        accelerate_reward = abs(vel_z) * reward_beta
+        # accelerate_reward = abs(vel_z) * reward_beta
+        accelerate_reward = abs(self.last_action) * reward_beta
 
         reward = distance_reward - accelerate_reward
         if pose.position.z <= 5.0:
@@ -142,7 +145,7 @@ class Hover(BaseTask):
         # Take one RL step, passing in current state and reward, and obtain action
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
-        #print("next action:", action)
+        self.last_action = action / 25.0
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
