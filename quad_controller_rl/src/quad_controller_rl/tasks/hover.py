@@ -118,7 +118,7 @@ class Hover(BaseTask):
         distance_reward = (10 - distance) * reward_alpha
         # accelerate_reward = abs(vel_z) * reward_beta
         if self.last_action is not None:
-            accelerate_reward = abs(self.last_action) * reward_beta
+            accelerate_reward = np.linalg.norm(self.last_action) * reward_beta
         else:
             accelerate_reward = 0
 
