@@ -150,7 +150,7 @@ class Hover(BaseTask):
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
         self.last_action = action / 25.0
 
-        agent.write_sa([pose.position.x, pose.position.y, pose.position.z,
+        self.agent.write_sa([pose.position.x, pose.position.y, pose.position.z,
                         vel_z, self.target_z - pose.position.z, linear_acceleration.z,
                         action[2], reward])
 
