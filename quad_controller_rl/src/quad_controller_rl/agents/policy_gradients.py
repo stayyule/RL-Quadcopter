@@ -183,7 +183,7 @@ class DDPG(BaseAgent):
     
     def write_sa(self,stats):
         """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward']])  # single-row dataframe
+        df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward'])  # single-row dataframe
         df_stats.to_csv(file_name, mode='a', index=False,
             header=not os.path.isfile(file_name))  # write header first time only        
 
