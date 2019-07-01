@@ -119,6 +119,8 @@ class Hover(BaseTask):
         # accelerate_reward = abs(vel_z) * reward_beta
         if self.last_action is not None:
             accelerate_reward = abs(self.last_action) * reward_beta
+        else:
+            accelerate_reward = 0
 
         #reward = distance_reward - accelerate_reward
         if pose.position.z <= 5.0:
