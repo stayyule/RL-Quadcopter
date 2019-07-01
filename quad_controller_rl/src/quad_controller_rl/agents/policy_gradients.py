@@ -183,8 +183,6 @@ class DDPG(BaseAgent):
         target_model.set_weights(new_weights)
 
 
-
-
 class Actor:
     """Actor (Policy) Model."""
 
@@ -339,7 +337,6 @@ class OUNoise:
         return self.state
 
 
-
 class ReplayBuffer:
     """Fixed-size circular buffer to store experience tuples."""
 
@@ -362,8 +359,13 @@ class ReplayBuffer:
     def sample(self, batch_size=64):
 
         """Randomly sample a batch of experiences from memory."""
+        prioritized_batch1 = self.memory[:batch_size/2.0]
+        print(prioritized_batch1)
+        prioritized_batch2 = random.sample(self.memory[batch_size/2.0 + 1:], k=batch_size/2.0)
+        print(prioritized_batch2)
+        print(prioritized_batch1 + prioritized_batch2)
         return random.sample(self.memory, k=batch_size)
-        # self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
+         
         # return self.memory[:batch_size]
 
     def __len__(self):
@@ -372,3 +374,7 @@ class ReplayBuffer:
 
     def get_reward(self, exp):
         return exp[2]
+
+    def order(self):
+        self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
+

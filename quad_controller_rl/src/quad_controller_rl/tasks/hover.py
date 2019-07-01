@@ -86,8 +86,10 @@ class Hover(BaseTask):
 
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
-                vel_x, vel_y, vel_z,
-                del_z ]), decimals=2)
+                vel_z,
+                del_z,
+                linear_acceleration.z,
+                timestamp / 10.0 ]), decimals=2)
         # state = np.around(np.array([
         #         scaled_x, scaled_y, scaled_z,
         #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
