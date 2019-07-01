@@ -101,8 +101,8 @@ class DDPG(BaseAgent):
             experiences = self.memory.sample(self.batch_size)
             #print('experience:', experiences)
             self.learn(experiences)
-        else:
-            action = np.array([1.0]).reshape(1,-1)
+        # else:
+        #     action = np.array([1.0]).reshape(1,-1)
 
         if done:
             # Write episode stats
