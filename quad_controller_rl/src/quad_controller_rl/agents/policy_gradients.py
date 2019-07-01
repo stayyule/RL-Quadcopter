@@ -359,9 +359,9 @@ class ReplayBuffer:
     def sample(self, batch_size=64):
 
         """Randomly sample a batch of experiences from memory."""
-        prioritized_batch1 = self.memory[:batch_size/2.0]
+        prioritized_batch1 = self.memory[:int(batch_size/2.0)]
         print(prioritized_batch1)
-        prioritized_batch2 = random.sample(self.memory[batch_size/2.0 + 1:], k=batch_size/2.0)
+        prioritized_batch2 = random.sample(self.memory[int(batch_size/2.0) + 1:], k=int(batch_size/2.0))
         print(prioritized_batch2)
         print(prioritized_batch1 + prioritized_batch2)
         return random.sample(self.memory, k=batch_size)
