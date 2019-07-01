@@ -1,5 +1,3 @@
-"""Takeoff task."""
-
 import numpy as np
 from gym import spaces
 from geometry_msgs.msg import Vector3, Point, Quaternion, Pose, Twist, Wrench

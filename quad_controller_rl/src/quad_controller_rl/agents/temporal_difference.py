@@ -25,15 +25,26 @@ class TD(BaseAgent):
         self.stats_filename = os.path.join(
             util.get_param('out'),
             "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
+        print("Saving stats to {}".format(self.stats_filename))  # [debug]
 
-        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
+        # Save Q stats
+        self.q_stats_filename = os.path.join(
+            util.get_param('out'),
+            "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
+
+        # Save S-A stats
+        self.sa_stats_filename = os.path.join(
+            util.get_param('out'),
+            "state_action_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        print("Saving states actions to {}".format(self.sa_stats_filename))  # [debug]
 
     def reset_episode_vars(self):
         self.last_state = None
         self.last_action = None
         self.last_reward = 0.0
         self.total_reward = 0.0
+        self.total_q = 0.0
         self.count = 0
 
     def step(self, state, reward, done):
@@ -61,9 +72,11 @@ class TD(BaseAgent):
             
         # Learn, if at end of episode
         if done:
-            self.reset_episode_vars()
-            self.write_stats([self.episode_num, self.total_reward])
+            self.write_stats([self.episode_num, self.total_reward], ['episode', 'total_reward'], self.stats_filename)
+            self.write_stats([self.episode_num, np.mean(self.total_q)], ['episode', 'Q_value'], self.q_stats_filename)
+            print('total reward={:7.4f}, count={}'.format(self.total_reward, self.count))
             self.episode_num += 1
+            self.reset_episode_vars()
 
         self.last_state = state
         self.last_action = action
@@ -84,7 +97,9 @@ class TD(BaseAgent):
 
     def update_Q(self, Qsa, Qsa_next, reward, alpha = 0.0001, gamma = 1):
         """ updates the action-value function estimate using the most recent time step """
-        return Qsa + (alpha * (reward + (gamma * Qsa_next) - Qsa))
+        q = Qsa + (alpha * (reward + (gamma * Qsa_next) - Qsa))
+        self.total_q += q
+        return q
 
     def epsilon_greedy_probs(self, Q_s, i_episode):
         """ obtains the action probabilities corresponding to epsilon-greedy policy """
@@ -95,8 +110,14 @@ class TD(BaseAgent):
         #print('arg max:', np.argmax(Q_s))
         return policy_s
 
-    def write_stats(self, stats):
+    def write_stats(self, stats, stats_columns, file_name):
         """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
-        df_stats.to_csv(self.stats_filename, mode='a', index=False,
-            header=not os.path.isfile(self.stats_filename))  # write header first time only
+        df_stats = pd.DataFrame([stats], columns=stats_columns)  # single-row dataframe
+        df_stats.to_csv(file_name, mode='a', index=False,
+            header=not os.path.isfile(file_name))  # write header first time only
+    
+    def write_sa(self,stats):
+        """Write single episode stats to CSV file."""
+        df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward'])  # single-row dataframe
+        df_stats.to_csv(self.sa_stats_filename, mode='a', index=False,
+            header=not os.path.isfile(self.sa_stats_filename))  # write header first time only        
