@@ -184,8 +184,8 @@ class DDPG(BaseAgent):
     def write_sa(self,stats):
         """Write single episode stats to CSV file."""
         df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward'])  # single-row dataframe
-        df_stats.to_csv(file_name, mode='a', index=False,
-            header=not os.path.isfile(file_name))  # write header first time only        
+        df_stats.to_csv(self.sa_stats_filename, mode='a', index=False,
+            header=not os.path.isfile(self.sa_stats_filename))  # write header first time only        
 
     def soft_update(self, local_model, target_model):
         """Soft update model params"""
