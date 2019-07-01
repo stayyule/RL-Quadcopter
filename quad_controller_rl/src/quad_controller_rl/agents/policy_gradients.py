@@ -153,6 +153,7 @@ class DDPG(BaseAgent):
         actions_next = self.actor_target.model.predict_on_batch(next_states)
         Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
         #print('Q next:', Q_targets_next)
+        self.total_q += Q_targets_next
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
