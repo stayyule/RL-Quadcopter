@@ -22,11 +22,10 @@ class DDPG(BaseAgent):
         # Task State Action
         self.task = task  # should contain observation_space and action_space
 
-        self.state_size = 9
+        self.state_size = 7
         self.action_size = 1
 
         # Actor (Policy) Model
-        self.acts=np.zeros(shape=self.task.action_space.shape)
         self.actor_local = Actor(self.state_size, self.action_size)
         self.actor_target = Actor(self.state_size, self.action_size)
 
@@ -49,7 +48,6 @@ class DDPG(BaseAgent):
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
         self.tau = 0.005 # for soft update of target parameters
-        self.count=0
 
         self.reset_episode_vars()
 
@@ -82,6 +80,7 @@ class DDPG(BaseAgent):
         self.total_q = 0.0
         self.count = 0
         self.acts = np.zeros(shape=self.task.action_space.shape)
+        self.acts[2] = 1.0
         self.memory.order()
 
     def step(self, state, reward, done):
@@ -110,7 +109,6 @@ class DDPG(BaseAgent):
             #print('episode ', self.episode_num, ' step count: ', self.count)
             self.write_stats([self.episode_num, self.total_reward], ['episode', 'total_reward'], self.stats_filename)
             self.write_stats([self.episode_num, np.mean(self.total_q)], ['episode', 'Q_value'], self.q_stats_filename)
-            print('total reward={:7.4f}, count={}'.format(self.total_reward, self.count))
             self.episode_num += 1
             self.reset_episode_vars()
             #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
@@ -118,9 +116,14 @@ class DDPG(BaseAgent):
         self.last_state = state
         self.last_action = action
 
-        self.acts[2]=action*25.0
-        # Returns completed action vector
-        return self.acts
+        # Return complete action vector
+        complete_action = np.zeros(6)
+        #print('step action:', complete_action.reshape(1,-1))
+        ## tanh
+        complete_action[2] = np.array(action).reshape(1) * 25
+        # sigmoid
+        #complete_action[2] = np.array(action).reshape(1) * 50 -25
+        return complete_action
 
     def act(self, states):
         """Returns actions [-1,1] for given state(s) as per current policy."""
@@ -243,7 +246,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
 
-        loss = K.mean( -action_gradients * actions)
+        loss = K.mean( -action_gradients * (actions))
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
@@ -284,11 +287,21 @@ class Critic:
 
         # Add hidden layer(s) for state pathway
         net_states = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
+        net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
 
-        # Concatenate state and action values
-        net = layers.Concatenate(axis=-1)([net_states, actions])
+        # Add hidden layer(s) for action pathway
+        net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
+        net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
+
+        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
+
+        # Combine state and action pathways
+        net = layers.Add()([net_states, net_actions])
         net = layers.Activation('relu')(net)
-        net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
+        # Concatenate state and action values
+        # net = layers.Concatenate(axis=-1)([net_states, actions])
+        # net = layers.Activation('relu')(net)
+        # net = layers.Dense(units=self.hidden_layer2, activation='relu')(net)
 
         # Add more layers to the combined network if needed
 
