@@ -192,7 +192,6 @@ class DDPG(BaseAgent):
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
         target_model.set_weights(new_weights)
 
-
 class Actor:
     """Actor (Policy) Model."""
 
@@ -255,7 +254,6 @@ class Actor:
             outputs=[],
             updates=updates_op)
 
-
 class Critic:
     """Critic (Value) Model."""
 
@@ -312,69 +310,53 @@ class Critic:
             inputs=[*self.model.input, K.learning_phase()],
             outputs=action_gradients)
 
-
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
-
-    def __init__(self, size, mu=None, theta=0.15, sigma=0.2):
+    #0.15 0.3
+    def __init__(self, size, mu=None, theta=0.15, sigma=0.02, dt=1e-2):
         """Initialize parameters and noise process."""
         self.size = size
         self.mu = mu if mu is not None else np.zeros(self.size)
         self.theta = theta
         self.sigma = sigma
+        self.dt = dt
         self.state = np.ones(self.size) * self.mu
         self.reset()
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
-        self.state = self.mu
+        self.state = np.ones(self.size) * self.mu
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
+        dx = self.theta * (self.mu - x) * self.dt + self.sigma * np.sqrt(self.dt) * np.random.randn(len(x))
         self.state = x + dx
         return self.state
 
-
 class ReplayBuffer:
-    """Fixed-size circular buffer to store experience tuples."""
-
-    def __init__(self, size=1000):
-        """Initialize a ReplayBuffer object."""
-        self.size = size  # maximum size of buffer
-        self.memory = []  # internal memory (list)
-        self.idx = 0  # current index into circular buffer
+    """Circular buffer for storing experience tuples"""
     
+    def __init__(self, size=1000):
+        """Initialize ReplayBuffer"""
+        self.size = size
+        self.memory = []
+        self.idx = 0
+        
     def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
+        """Add new experience to memory"""
         e = Experience(state, action, reward, next_state, done)
-        #print(e)
         if len(self.memory) < self.size:
             self.memory.append(e)
         else:
-            self.memory[self.idx] = e
-            self.idx = (self.idx + 1) % self.size
-    
+            self.memory[idx] = e
+            self.idx = (self.idx +1) % self.size
+            
     def sample(self, batch_size=64):
-
-        """Randomly sample a batch of experiences from memory."""
-        prioritized_batch1 = self.memory[:int(batch_size/2.0)]
-        #print(prioritized_batch1)
-        prioritized_batch2 = random.sample(self.memory[int(batch_size/2.0) + 1:], k=int(batch_size/2.0))
-        #print(prioritized_batch2)
-        #print(prioritized_batch1 + prioritized_batch2)
-        #return random.sample(self.memory, k=batch_size)
-         
-        return prioritized_batch1 + prioritized_batch2
-
+        """Random sample of experiences"""
+        return random.sample(self.memory, k=batch_size)
+    
     def __len__(self):
-        """Return the current size of internal memory."""
+        """Return size of internal memory"""
         return len(self.memory)
-
-    def get_reward(self, exp):
-        return exp[2]
-
-    def order(self):
-        self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
 
