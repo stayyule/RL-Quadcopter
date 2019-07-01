@@ -66,6 +66,12 @@ class DDPG(BaseAgent):
             "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
         print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
 
+        # Save S-A stats
+        self.sa_stats_filename = os.path.join(
+            util.get_param('out'),
+            "state_action_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        print("Saving states actions to {}".format(self.sa_stats_filename))  # [debug]
+
 
     def reset_episode_vars(self):
         self.last_state = None
@@ -174,6 +180,12 @@ class DDPG(BaseAgent):
         df_stats = pd.DataFrame([stats], columns=stats_columns)  # single-row dataframe
         df_stats.to_csv(file_name, mode='a', index=False,
             header=not os.path.isfile(file_name))  # write header first time only
+    
+    def write_sa(self,stats):
+        """Write single episode stats to CSV file."""
+        df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward']])  # single-row dataframe
+        df_stats.to_csv(file_name, mode='a', index=False,
+            header=not os.path.isfile(file_name))  # write header first time only        
 
     def soft_update(self, local_model, target_model):
         """Soft update model params"""

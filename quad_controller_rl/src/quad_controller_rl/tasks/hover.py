@@ -146,6 +146,12 @@ class Hover(BaseTask):
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
         self.last_action = action / 25.0
+
+        agent.write_sa([pose.position.x, pose.position.y, pose.position.z,
+                        vel_z, self.target_z - pose.position.z, linear_acceleration.z,
+                        action[2], reward])
+
+
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
