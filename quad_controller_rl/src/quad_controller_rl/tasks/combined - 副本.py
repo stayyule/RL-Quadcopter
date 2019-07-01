@@ -33,6 +33,7 @@ class Combined(BaseTask):
         self.target_x = 0.0
         self.target_y = 0.0
         self.target_z = 10.0
+        self.land_target_z = 10.0
 
         self.last_x = 0.0
         self.last_y = 0.0
@@ -46,6 +47,9 @@ class Combined(BaseTask):
         self.last_y = 0.0
         self.last_z = 0.0
         self.linear_vel = 0.0
+        self.target_z = 10.0
+        self.hovered = False
+        self.action = None
         # Nothing to reset; just return initial condition
         return Pose(
                 position=Point(0.0, 0.0, np.random.normal(0.5, 0.1)),  # drop off from a slight random height
@@ -71,6 +75,10 @@ class Combined(BaseTask):
         del_y = (self.target_y - pose.position.y) / self.scale * 5.0
         del_z = (self.target_z - pose.position.z) / self.scale * 5.0
 
+        # del_x = self.target_x - pose.position.x
+        # del_y = self.target_y - pose.position.y
+        # del_z = self.target_z - pose.position.z
+
         state = np.around(np.array([
                 scaled_x, scaled_y, scaled_z,
                 vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
@@ -93,7 +101,7 @@ class Combined(BaseTask):
         
         reward_alpha = 0.3
         reward_beta = 0.05
-        distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
+        distance = np.linalg.norm([del_x, del_y, del_z])
 
         distance_reward =  - distance * reward_alpha
 
@@ -106,10 +114,15 @@ class Combined(BaseTask):
 #                accelerate_reward = linear_acceleration.z * reward_beta
         accelerate_reward = abs(linear_acceleration.z) * reward_beta
 
-        reward = distance_reward - accelerate_reward
+        #reward = distance_reward - accelerate_reward
+
+        if pose.position.z <= 5.0:
+            reward = distance_reward
+        else:
+            reward = distance_reward - accelerate_reward
 
         if timestamp > self.landing_start and self.hovered:
-           self.target_z = max ((self.target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
+           self.target_z = max ((self.land_target_z / self.landing_duration) * (self.landing_duration + self.landing_start - timestamp), 0.0)
         if del_z < 0.1 and self.target_z == 10.0:
             self.hovered = True
         
