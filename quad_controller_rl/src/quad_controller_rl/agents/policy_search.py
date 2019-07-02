@@ -13,9 +13,9 @@ class RandomPolicySearch(BaseAgent):
     def __init__(self, task):
         # Task (environment) information
         self.task = task  # should contain observation_space and action_space
-        self.state_size = 9 # 7 for takeoff
+        self.state_size = 9 # 7 for take off
         self.state_range = self.task.observation_space.high - self.task.observation_space.low
-        self.action_size = 1
+        self.action_size = np.prod(self.task.action_space.shape)
         self.action_range = self.task.action_space.high - self.task.action_space.low
 
         # Policy parameters
