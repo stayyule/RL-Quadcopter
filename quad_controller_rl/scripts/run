@@ -1,0 +1,7 @@
+cd ~/yj/
+catkin_make
+source devel/setup.bash
+cd ~/yj/src/RL-Quadcopter/quad_controller_rl/launch
+roslaunch quad_controller_rl rl_controller.launch agent:=$1 task:=$2
+
+
