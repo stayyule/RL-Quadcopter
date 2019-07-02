@@ -36,7 +36,6 @@ class Combined(BaseTask):
         self.last_pos = np.array([0.0,0.0,0.0])
         self.start = np.array([0.0,0.0,0.0])
         self.last_time = 0.0
-        self.count = 0
 
         # flag of hover action
         self.hovered = False
@@ -48,7 +47,6 @@ class Combined(BaseTask):
     def reset(self):
         self.last_pos = self.start
         self.last_time = 0.0
-        self.count = 0
         self.target = np.array([0.0,0.0,10.0])
         # set initial target for target will be changed throughout time
         self.initial_target_z = self.target[2]
@@ -71,7 +69,7 @@ class Combined(BaseTask):
 
 
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
-        self.count += 1
+
         #position before scaling
         position = np.array([pose.position.x, pose.position.y, pose.position.z])
 
@@ -104,7 +102,7 @@ class Combined(BaseTask):
         accelerate_reward = accelerate * reward_beta
         reward = distance_reward - accelerate_reward
 
-        if distance < 0.1 and self.target[2]==10.0:
+        if distance < 0.1 and self.target[2]==self.initial_target_z:
             self.hovered = True
         if timestamp>self.landing_start_time and self.hovered:
             target_z = max((self.initial_target_z/self.landing_time)*(
