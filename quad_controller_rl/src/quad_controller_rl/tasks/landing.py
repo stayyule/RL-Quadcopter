@@ -15,6 +15,7 @@ class Landing(BaseTask):
             np.array([  cube_size / 2,   cube_size / 2, cube_size,  1.0,  1.0,  1.0,  1.0]))        
             
         #print("Takeoff(): observation_space = {}".format(self.observation_space))  # [debug]
+        self.observation_space_range = self.observation_space.high - self.observation_space.low
 
         # Action space: <force_x, .._y, .._z, torque_x, .._y, .._z>
         max_force = 25.0
@@ -23,98 +24,80 @@ class Landing(BaseTask):
             np.array([-max_force, -max_force, -max_force, -max_torque, -max_torque, -max_torque]),
             np.array([ max_force,  max_force,  max_force,  max_torque,  max_torque,  max_torque]))
         #print("Takeoff(): action_space = {}".format(self.action_space))  # [debug]
+        self.action_space_range = self.action_space.high - self.action_space.low
 
         # Task-specific parameters
-        self.max_duration = 7.0  # secs
-        self.landing_duration = 5.0
+        self.max_duration = 10.0  # secs
 
-        self.target_x = 0.0
-        self.target_y = 0.0
-        self.target_z = 10.0
-
-        self.last_x = 0.0
-        self.last_y = 0.0
-        self.last_z = 0.0
-
-        self.linear_vel = 0.0
-        self.scale = 15.0
-        self.initial_target = self.target_z
+        self.target = np.array([0.0,0.0,10.0])
+        self.last_pos = np.array([0.0,0.0,0.0])
+        self.start = np.array([0.0,0.0,10.0])
+        self.last_time = 0.0
+        self.count = 0
+        self.landing_time = 5.0
+        self.initial_target_z = self.target[2]
 
     def reset(self):
-        self.last_x = 0.0
-        self.last_y = 0.0
-        self.last_z = 0.0
-        self.linear_vel = 0.0
-        # Nothing to reset; just return initial condition
+        self.count = 0
+        self.action = None
+        self.last_time = 0.0
+        self.target = np.array([0.0,0.0,10.0])
+        self.initial_target_z = self.target[2]
+        self.last_pos = self.start
         return Pose(
-                position=Point(0.0, 0.0, np.random.normal(10.0, 0.1)),  # drop off from a slight random height
+                position=Point(0.0, 0.0, self.start[2]),  # drop off from a slight random height
                 orientation=Quaternion(0.0, 0.0, 0.0, 0.0),
             ), Twist(
                 linear=Vector3(0.0, 0.0, 0.0),
                 angular=Vector3(0.0, 0.0, 0.0)
             )
 
+    def pos_rescale(self,state):
+        #rescaling to (-5.,5.)
+        mid = (self.observation_space.high + self.observation_space.low)*0.5
+        rescaled = 5.0 * ((state - mid[:3])/(self.observation_space_range[:3]*0.5))
+        return rescaled
+
+
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
-        # Prepare state vector (pose only; ignore angular_velocity, linear_acceleration)
+        self.count += 1       
+        #position before scaling
+        position = np.array([pose.position.x, pose.position.y, pose.position.z])
 
-        scaled_x = pose.position.x / self.scale * 5.0
-        scaled_y = pose.position.y / self.scale * 5.0
-        scaled_z = pose.position.z / self.scale * 5.0
+        scaled_pos = self.pos_rescale(position)
+        scaled_tar = self.pos_rescale(self.target)
+        # distance vector
+        distance_vec = scaled_tar - scaled_pos
+        # velocity
+        if timestamp != self.last_time:
+            velocity = (position - self.last_pos) / (timestamp - self.last_time)
+        else:
+            velocity = np.array([0.0,0.0,0.0])
 
-        vel_x = pose.position.x - self.last_x
-        vel_y = pose.position.y - self.last_y
-        vel_z = pose.position.z - self.last_z
-        
-        del_x = (self.target_x - pose.position.x) / self.scale * 5.0
-        del_y = (self.target_y - pose.position.y) / self.scale * 5.0
-        del_z = (self.target_z - pose.position.z) / self.scale * 5.0
+        state = np.concatenate((scaled_pos, velocity, distance_vec * 5.0),axis=-1)
 
-        # state = np.around(np.array([
-        #         scaled_x, scaled_y, scaled_z,
-        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-        #         del_x, del_y, del_z ]), decimals=2)
+        self.last_pos = position
+        self.last_time = timestamp
 
-        # state = np.around(np.array([
-        #         pose.position.x, pose.position.y, pose.position.z,
-        #         vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-        #         self.target_x - pose.position.x, 
-        #         self.target_y - pose.position.y, 
-        #         self.target_z - pose.position.z ]), decimals=2)
-
-        state = np.array([
-                scaled_x, scaled_y, scaled_z,
-                vel_x * 10.0, vel_y * 10.0, vel_z * 10.0,
-                del_z ])
-
-        self.last_x = pose.position.x
-        self.last_y = pose.position.y
-        self.last_z = pose.position.z
-
-        self.linear_vel += linear_acceleration.z
         # Compute reward / penalty and check if this episode is complete
         done = False
         
         reward_alpha = 0.3
         reward_beta = 0.05
-        distance = np.power(np.power(del_x, 2) + np.power(del_y, 2) + np.power(del_z, 2), 0.5)
 
-        distance_reward = - distance * reward_alpha
+        # distance value
+        distance = np.linalg.norm(self.target - position)
+        accelerate = np.linalg.norm(np.array([linear_acceleration.x, linear_acceleration.y, linear_acceleration.z]))
 
-
-        accelerate_reward = abs(linear_acceleration.z) * reward_beta
-
+        distance_reward = (5 - distance) * reward_alpha
+        accelerate_reward = accelerate * reward_beta
         reward = distance_reward - accelerate_reward
-        
-        target_val = (self.initial_target / self.landing_duration) * (self.landing_duration - timestamp)
 
-        self.target_z = max (np.around(target_val), 0.0)
-        
-        print('==========')
-        print('height:', pose.position.z)
-        print('reward:', reward)
-        print('distance:', distance_reward)
-        print('accelerate:', accelerate_reward)        
-        print('target:', self.target_z)
+        target_z = max((self.initial_target_z/self.landing_time)*(self.landing_time-timestamp),0.0)
+        self.target = np.array([0.0,0.0,target_z])
+
+        print('reward={:.3} distance={:.3} target={:.3}'.format(reward ,distance_vec[2],self.target[2]),end='\r')
+            
 
         if timestamp > self.max_duration:  # agent has run out of time
             #reward -= 10.0  # extra penalty

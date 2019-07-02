@@ -50,7 +50,7 @@ class TD(BaseAgent):
     def step(self, state, reward, done):
             
         # Transform state vector
-        state_array = state.flatten()  # convert to row vector
+        state_array = np.floor(state).flatten()  # convert to row vector
         #print('state:', state)
         state = ''
         for s in state_array:
