@@ -13,6 +13,7 @@ class TD(BaseAgent):
         self.task = task  # should contain observation_space and action_space
 
         self.action_space = 3
+        self.acts=np.zeros(shape=self.task.action_space.shape)
 
         self.Q = defaultdict(lambda: np.zeros(self.action_space))
 
@@ -46,6 +47,7 @@ class TD(BaseAgent):
         self.total_reward = 0.0
         self.total_q = 0.0
         self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
 
     def step(self, state, reward, done):
             
@@ -85,7 +87,9 @@ class TD(BaseAgent):
         # Return complete action vector
         complete_action = (action + 3) * 5.0
         #print('action:', action, '-', complete_action)
-        return np.array([[0, 0, complete_action, 0, 0, 0]])
+        self.acts[2] = complete_action
+        # Returns completed action vector
+        return self.acts
 
 
     def act(self, state):
