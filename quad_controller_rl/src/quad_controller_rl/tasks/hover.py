@@ -37,7 +37,7 @@ class Hover(BaseTask):
 
     def reset(self):
         self.last_pos = self.start
-        self.action = None
+
         self.last_time = 0.0
         self.count = 0
         # Nothing to reset; just return initial condition
@@ -55,8 +55,9 @@ class Hover(BaseTask):
         rescaled = 5.0 * ((state - mid[:3])/(self.observation_space_range[:3]*0.5))
         return rescaled
 
+
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
-        
+        self.count += 1       
         #position before scaling
         position = np.array([pose.position.x, pose.position.y, pose.position.z])
 
