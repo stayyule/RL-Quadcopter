@@ -71,6 +71,7 @@ class Combined(BaseTask):
 
 
     def update(self, timestamp, pose, angular_velocity, linear_acceleration):
+        self.count += 1
         #position before scaling
         position = np.array([pose.position.x, pose.position.y, pose.position.z])
 

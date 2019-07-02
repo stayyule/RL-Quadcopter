@@ -4,3 +4,4 @@ from quad_controller_rl.tasks.hover_td import Hover_TD
 from quad_controller_rl.tasks.hover import Hover
 from quad_controller_rl.tasks.landing import Landing
 from quad_controller_rl.tasks.combined import Combined
+from quad_controller_rl.tasks.combined_td import Combined_TD
