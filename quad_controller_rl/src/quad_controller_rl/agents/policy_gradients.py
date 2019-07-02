@@ -45,7 +45,7 @@ class Actor:
 
         # Loss function using Q-val gradients
         action_grads = layers.Input(shape=(self.action_size,))
-        loss = K.mean(action_grads * actions)
+        loss = K.mean(-action_grads * actions)
 
         # Optimizer and Training Function
         optimizer = optimizers.Adam(lr=0.0001)
@@ -108,7 +108,7 @@ class DDPG(BaseAgent):
         self.task = task
 
         # Constrain State and Action matrices
-        self.state_size = 7
+        self.state_size = 9
         self.action_size = 1
         # For debugging:
         print("Constrained State {} and Action {}; Original State {} and Action {}".format(self.state_size, self.action_size,
@@ -158,6 +158,7 @@ class DDPG(BaseAgent):
         self.last_action = None
         self.total_reward = 0.0
         self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
 
     def step(self, state, reward, done):
 
@@ -181,13 +182,10 @@ class DDPG(BaseAgent):
             self.episode_num += 1
             self.reset_episode_vars()
 
-
         self.last_state = state
         self.last_action = action
-        self.acts[2]=action*50*0.5
-
+        self.acts[2]=action*25.0
         # Returns completed action vector
-        #return self.postprocess(action)
         return self.acts
 
     def act(self, states):
