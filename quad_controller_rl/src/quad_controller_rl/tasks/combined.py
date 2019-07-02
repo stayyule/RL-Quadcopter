@@ -34,7 +34,7 @@ class Combined(BaseTask):
         self.initial_target_z = self.target[2]
 
         self.last_pos = np.array([0.0,0.0,0.0])
-        self.start = np.array([0.0,0.0,10.0])
+        self.start = np.array([0.0,0.0,0.0])
         self.last_time = 0.0
         self.count = 0
 
