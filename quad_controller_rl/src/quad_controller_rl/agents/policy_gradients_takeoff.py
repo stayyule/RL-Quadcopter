@@ -26,6 +26,7 @@ class DDPG(BaseAgent):
         self.action_size = 1
 
         # Actor (Policy) Model
+        self.acts=np.zeros(shape=self.task.action_space.shape)
         self.actor_local = Actor(self.state_size, self.action_size)
         self.actor_target = Actor(self.state_size, self.action_size)
 
@@ -48,6 +49,7 @@ class DDPG(BaseAgent):
         # Algorithm parameters
         self.gamma = 0.99 # discount factor
         self.tau = 0.005 # for soft update of target parameters
+        self.count=0
 
         self.reset_episode_vars()
 
@@ -58,15 +60,19 @@ class DDPG(BaseAgent):
         self.stats_filename = os.path.join(
             util.get_param('out'),
             "stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.stats_columns = ['episode', 'total_reward']  # specify columns to save
-        print("Saving stats {} to {}".format(self.stats_columns, self.stats_filename))  # [debug]
+        print("Saving stats to {}".format(self.stats_filename))  # [debug]
 
         # Save Q stats
         self.q_stats_filename = os.path.join(
             util.get_param('out'),
             "q_stats_{}.csv".format(util.get_timestamp()))  # path to CSV file
-        self.q_stats_columns = ['episode', 'Q_value']  # specify columns to save
-        print("Saving q stats {} to {}".format(self.q_stats_columns, self.q_stats_filename))  # [debug]
+        print("Saving q stats to {}".format(self.q_stats_filename))  # [debug]
+
+        # Save S-A stats
+        self.sa_stats_filename = os.path.join(
+            util.get_param('out'),
+            "state_action_{}.csv".format(util.get_timestamp()))  # path to CSV file
+        print("Saving states actions to {}".format(self.sa_stats_filename))  # [debug]
 
 
     def reset_episode_vars(self):
@@ -75,6 +81,8 @@ class DDPG(BaseAgent):
         self.total_reward = 0.0
         self.total_q = 0.0
         self.count = 0
+        self.acts = np.zeros(shape=self.task.action_space.shape)
+
 
     def step(self, state, reward, done):
 
@@ -93,13 +101,16 @@ class DDPG(BaseAgent):
             experiences = self.memory.sample(self.batch_size)
             #print('experience:', experiences)
             self.learn(experiences)
-        #...
+        else:
+            action = np.array([0.8]).reshape(1,-1)
+
         if done:
             # Write episode stats
             # 241
             #print('episode ', self.episode_num, ' step count: ', self.count)
-            self.write_stats([self.episode_num, self.total_reward], self.stats_filename)
-            self.write_stats([self.episode_num, self.total_q], self.q_stats_filename)
+            self.write_stats([self.episode_num, self.total_reward], ['episode', 'total_reward'], self.stats_filename)
+            self.write_stats([self.episode_num, np.mean(self.total_q)], ['episode', 'Q_value'], self.q_stats_filename)
+            print('total reward={:7.4f}, count={}'.format(self.total_reward, self.count))
             self.episode_num += 1
             self.reset_episode_vars()
             #print('model:', np.array(self.actor_target.model.get_weights()[-1]).reshape(1,-1))
@@ -107,14 +118,9 @@ class DDPG(BaseAgent):
         self.last_state = state
         self.last_action = action
 
-        # Return complete action vector
-        complete_action = np.zeros(6)
-        #print('step action:', complete_action.reshape(1,-1))
-        ## tanh
-        complete_action[2] = np.array(action).reshape(1) * 25
-        # sigmoid
-        #complete_action[2] = np.array(action).reshape(1) * 50 -25
-        return complete_action
+        self.acts[2]=action*25.0
+        # Returns completed action vector
+        return self.acts
 
     def act(self, states):
         """Returns actions [-1,1] for given state(s) as per current policy."""
@@ -124,7 +130,7 @@ class DDPG(BaseAgent):
         actions = self.actor_local.model.predict(states)
         noise_val = self.noise.sample()
         #noise_epsilon = self.epsilon
-        noise_epsilon = self.epsilon / ( int(self.episode_num / 10 ) + 1)
+        noise_epsilon = self.epsilon / ( int(self.episode_num / 30 ) + 1)
         #if len(self.memory) > self.batch_size:
         #    return np.around(actions + noise_epsilon * noise_val, decimals=2) # add some noise for exploration
         #else:
@@ -133,7 +139,7 @@ class DDPG(BaseAgent):
         final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), -1, 1)
         #sigmoid
         #final_action = np.clip(np.around(actions + noise_val * noise_epsilon, decimals=2), 0, 1)
-        print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", np.around(final_action,decimals=2))
+        #print("predict:", np.around(actions, decimals=2), "noise:", np.around(noise_val * noise_epsilon, decimals=2), "action:", np.around(final_action,decimals=2))
 
         return final_action
 
@@ -151,6 +157,7 @@ class DDPG(BaseAgent):
         actions_next = self.actor_target.model.predict_on_batch(next_states)
         Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
         #print('Q next:', Q_targets_next)
+        self.total_q += Q_targets_next
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
@@ -165,11 +172,17 @@ class DDPG(BaseAgent):
         self.soft_update(self.critic_local.model, self.critic_target.model)
         self.soft_update(self.actor_local.model, self.actor_target.model)
 
-    def write_stats(self, stats, file_name):
+    def write_stats(self, stats, stats_columns, file_name):
         """Write single episode stats to CSV file."""
-        df_stats = pd.DataFrame([stats], columns=self.stats_columns)  # single-row dataframe
+        df_stats = pd.DataFrame([stats], columns=stats_columns)  # single-row dataframe
         df_stats.to_csv(file_name, mode='a', index=False,
             header=not os.path.isfile(file_name))  # write header first time only
+    
+    def write_sa(self,stats):
+        """Write single episode stats to CSV file."""
+        df_stats = pd.DataFrame([stats], columns=['x', 'y', 'z', 'vel_z', 'tar_z', 'acce_z', 'action', 'reward'])  # single-row dataframe
+        df_stats.to_csv(self.sa_stats_filename, mode='a', index=False,
+            header=not os.path.isfile(self.sa_stats_filename))  # write header first time only        
 
     def soft_update(self, local_model, target_model):
         """Soft update model params"""
@@ -178,9 +191,6 @@ class DDPG(BaseAgent):
 
         new_weights = self.tau * local_weights + (1 - self.tau) * target_weights
         target_model.set_weights(new_weights)
-
-
-
 
 class Actor:
     """Actor (Policy) Model."""
@@ -232,18 +242,17 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
 
-        loss = K.mean( action_gradients * (actions))
+        loss = K.mean( -action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
         optimizer = optimizers.Adam(lr=self.learning_rate)
-        updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss, constraints=[])
+        updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
             outputs=[],
             updates=updates_op)
-
 
 class Critic:
     """Critic (Value) Model."""
@@ -273,17 +282,7 @@ class Critic:
 
         # Add hidden layer(s) for state pathway
         net_states = layers.Dense(units=self.hidden_layer1, activation='relu')(states)
-        #net_states = layers.Dense(units=self.hidden_layer2, activation='relu')(net_states)
 
-        # Add hidden layer(s) for action pathway
-        #net_actions = layers.Dense(units=self.hidden_layer1, activation='relu')(actions)
-        #net_actions = layers.Dense(units=self.hidden_layer2, activation='relu')(net_actions)
-
-        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
-
-        # Combine state and action pathways
-        # net = layers.Add()([net_states, net_actions])
-        # net = layers.Activation('relu')(net)
         # Concatenate state and action values
         net = layers.Concatenate(axis=-1)([net_states, actions])
         net = layers.Activation('relu')(net)
@@ -311,61 +310,53 @@ class Critic:
             inputs=[*self.model.input, K.learning_phase()],
             outputs=action_gradients)
 
-
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
-
-    def __init__(self, size, mu=None, theta=0.15, sigma=0.2):
+    #0.15 0.3
+    def __init__(self, size, mu=None, theta=0.15, sigma=0.02, dt=1e-2):
         """Initialize parameters and noise process."""
         self.size = size
         self.mu = mu if mu is not None else np.zeros(self.size)
         self.theta = theta
         self.sigma = sigma
+        self.dt = dt
         self.state = np.ones(self.size) * self.mu
         self.reset()
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
-        self.state = self.mu
+        self.state = np.ones(self.size) * self.mu
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
+        dx = self.theta * (self.mu - x) * self.dt + self.sigma * np.sqrt(self.dt) * np.random.randn(len(x))
         self.state = x + dx
         return self.state
 
-
-
 class ReplayBuffer:
-    """Fixed-size circular buffer to store experience tuples."""
-
-    def __init__(self, size=1000):
-        """Initialize a ReplayBuffer object."""
-        self.size = size  # maximum size of buffer
-        self.memory = []  # internal memory (list)
-        self.idx = 0  # current index into circular buffer
+    """Circular buffer for storing experience tuples"""
     
+    def __init__(self, size=1000):
+        """Initialize ReplayBuffer"""
+        self.size = size
+        self.memory = []
+        self.idx = 0
+        
     def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
+        """Add new experience to memory"""
         e = Experience(state, action, reward, next_state, done)
-        #print(e)
         if len(self.memory) < self.size:
             self.memory.append(e)
         else:
-            self.memory[self.idx] = e
-            self.idx = (self.idx + 1) % self.size
-    
+            self.memory[idx] = e
+            self.idx = (self.idx +1) % self.size
+            
     def sample(self, batch_size=64):
-
-        """Randomly sample a batch of experiences from memory."""
+        """Random sample of experiences"""
         return random.sample(self.memory, k=batch_size)
-        # self.memory = sorted(self.memory, key=self.get_reward, reverse=True)
-        # return self.memory[:batch_size]
-
+    
     def __len__(self):
-        """Return the current size of internal memory."""
+        """Return size of internal memory"""
         return len(self.memory)
 
-    def get_reward(self, exp):
-        return exp[2]
