@@ -27,7 +27,7 @@ class Landing(BaseTask):
         self.action_space_range = self.action_space.high - self.action_space.low
 
         # Task-specific parameters
-        self.max_duration = 10.0  # secs
+        self.max_duration = 6.0  # secs
 
         self.target = np.array([0.0,0.0,10.0])
         self.last_pos = np.array([0.0,0.0,0.0])
