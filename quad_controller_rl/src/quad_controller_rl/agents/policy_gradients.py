@@ -173,6 +173,9 @@ class DDPG(BaseAgent):
         if len(self.memory) > self.batch_size:
                 experiences = self.memory.sample(self.batch_size)
                 self.learn(experiences)
+        else:
+            action = np.array([0.8]).reshape(1,-1)
+        
         if done:
             # Learn from memory
 
