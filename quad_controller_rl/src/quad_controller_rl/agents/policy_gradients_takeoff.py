@@ -242,7 +242,7 @@ class Actor:
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
 
-        loss = K.mean( -action_gradients * actions)
+        loss = K.mean( action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
