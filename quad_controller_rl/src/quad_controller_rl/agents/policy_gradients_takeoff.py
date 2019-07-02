@@ -16,7 +16,7 @@ Experience = namedtuple("Experience",
     field_names=["state", "action", "reward", "next_state", "done"])
 
 
-class DDPG(BaseAgent):
+class DDPG_Takeoff(BaseAgent):
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
         # Task State Action
