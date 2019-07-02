@@ -1,6 +1,9 @@
 pyyaml
 numpy
-jupyter
+
+
+
+
 gym
 catkin_pkg
 rospkg
