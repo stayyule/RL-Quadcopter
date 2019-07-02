@@ -107,6 +107,9 @@ class Landing(BaseTask):
         # Note: The reward passed in here is the result of past action(s)
         action = self.agent.step(state, reward, done)  # note: action = <force; torque> vector
         #print("next action:", action)
+        self.agent.write_sa([scaled_pos[0], scaled_pos[1], scaled_pos[2],
+                velocity[2], distance_vec[2], linear_acceleration.z,
+                action[2]/ 25.0,  reward])    
         # Convert to proper force command (a Wrench object) and return it
         if action is not None:
             action = np.clip(action.flatten(), self.action_space.low, self.action_space.high)  # flatten, clamp to action space limits
