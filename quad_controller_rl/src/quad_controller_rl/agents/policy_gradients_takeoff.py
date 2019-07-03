@@ -43,7 +43,7 @@ class DDPG_Takeoff(BaseAgent):
 
         # Replay memory
         self.buffer_size = 100000
-        self.batch_size = 128
+        self.batch_size = 32
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
