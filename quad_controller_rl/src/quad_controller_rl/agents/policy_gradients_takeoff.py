@@ -47,7 +47,7 @@ class DDPG_Takeoff(BaseAgent):
         self.memory = ReplayBuffer(self.buffer_size)
 
         # Algorithm parameters
-        self.gamma = 0.5 # discount factor
+        self.gamma = 0.99 # discount factor
         self.tau = 0.005 # for soft update of target parameters
         self.count=0
 
@@ -211,7 +211,7 @@ class Actor:
         # Initialize any other variables here
         self.hidden_layer1 = 64
         self.hidden_layer2 = 64
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.0005
 
         self.build_model()
 
