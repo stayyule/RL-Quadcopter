@@ -211,7 +211,7 @@ class Actor:
         # Initialize any other variables here
         self.hidden_layer1 = 64
         self.hidden_layer2 = 64
-        self.learning_rate = 0.0005
+        self.learning_rate = 0.0001
 
         self.build_model()
 
